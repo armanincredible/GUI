@@ -1,7 +1,6 @@
 #include "sphere.h"
 #include "math.h"
 #include <unistd.h>
-#include "qtimer.h"
 #include "square_equation.h"
 #include "control.h"
 

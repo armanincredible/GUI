@@ -1,7 +1,7 @@
 #include "window.h"
 #include "math.h"
 
-int Window::paintCoordinateSystem (QPainter* painter)
+int CoordinateSystem::paintCoordinateSystem (QPainter* painter)
 {
     if (painter == NULL)
     {
@@ -12,19 +12,19 @@ int Window::paintCoordinateSystem (QPainter* painter)
     int height = heigh();
     int widtht = width();
 
-    int origin_x = origin_point_.x;
-    int origin_y = origin_point_.y;
+    //int origin_x = origin_point_.x;
+    //int origin_y = origin_point_.y;
 
     painter->drawRect(x0, y0, widtht, height);
-    painter->drawLine(origin_x, y0 + height,
-                     origin_x, y0);
+    /*painter->drawLine(origin_x, y0 + height,
+                     origin_x, y0);*/
 
-    painter->drawLine(x0,         origin_y,
-                     x0 + widtht, origin_y);
+    /*painter->drawLine(x0,         origin_y,
+                     x0 + widtht, origin_y);*/
     return 0;
 }
 
-
+/*
 void Window_Clock::paintEvent(QPaintEvent *)
 {
     static double alpha = 0;
@@ -63,4 +63,19 @@ void Window_Click::paintEvent(QPaintEvent *)
     Vector vec = {{0, 0}, {mouse_click_.x, mouse_click_.y}};
 
     vec.paintVector(&painter, origin_point);
+}*/
+
+int CoordinateSystem::is_my_area(Point click) const
+{
+    Point start_point = get_start_point();
+    Point end_point = get_start_point();
+    if (click.x > start_point.x && click.x < end_point.x &&
+        click.y > end_point.y && click.y < start_point.y)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

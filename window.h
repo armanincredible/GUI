@@ -9,6 +9,51 @@
 
 
 
+class CoordinateSystem
+{
+private:
+    Point start_point_ = {};
+    Point end_point_ = {};
+    Point origin_point_ = {};
+
+public:
+    CoordinateSystem(Point start, Point end, Point origin):
+        start_point_(start),
+        end_point_(end),
+        origin_point_(origin)
+    {
+    }
+    CoordinateSystem(Point start, Point end):
+        start_point_(start),
+        end_point_(end)
+    {
+    }
+    CoordinateSystem(){}
+    //~CoordinateSystem(){}
+
+    int heigh() const
+    {
+        return end_point_.y - start_point_.y;
+    }
+
+    int width() const
+    {
+        return end_point_.x - start_point_.x;
+    }
+
+    Point get_origin_point() const
+    {
+        return origin_point_;
+    }
+    Point get_start_point()const
+    {
+        return start_point_;
+    }
+    int is_my_area(Point click) const;
+    int paintCoordinateSystem(QPainter*);
+};
+
+
 class Window : public QWidget
 {
     Q_OBJECT
@@ -52,6 +97,7 @@ public:
     int paintCoordinateSystem(QPainter*);
 };
 
+/*
 class Window_Clock : public Window
 {
 private:
@@ -82,7 +128,7 @@ protected:
 public:
     Window_Click(Point start, Point end, Point origin):
         Window(start, end, origin){};
-};
+};*/
 
 
 #endif // WINDOW_H

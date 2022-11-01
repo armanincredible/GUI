@@ -25,6 +25,12 @@ set(PROJECT_SOURCES
     window.h
     window.cpp
     control.h
+    button.h
+    button.cpp
+    widget.h
+    widget.cpp
+    tool.h
+    tool.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
