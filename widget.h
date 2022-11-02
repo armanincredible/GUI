@@ -4,6 +4,12 @@
 #include "button.h"
 #include "tool.h"
 
+enum WidgetType
+{
+    PaintWidget,
+    MainWidget
+};
+
 class AbstrWidget : public CoordinateSystem, public QWidget
 {
     virtual void paintEvent(QPaintEvent *){};
@@ -17,24 +23,37 @@ public:
 class WidgetManager : public AbstrWidget
 {
 private:
+    Point mouse_click_coordinate_ = {};
+    WidgetType type_ = {};
     WidgetManager** widgets_ = NULL;
     size_t widgets_num_ = 0;
-    ToolManager** tools_ = NULL;
+    ToolManager* tool_manager_ = NULL;
     size_t tools_num_ = 0;
     Button** buttons_ = NULL;
     size_t buttons_num_ = 0;
     WidgetManager* parent_widget_ = NULL;
     char* widget_name = NULL;
 protected:
-    int controller (Button*, WidgetManager*, Tool*);
+    int (*controller_) (Button*, WidgetManager*, Tool*) = NULL;
     void paintEvent(QPaintEvent *) override;
     void mousePressEvent(QMouseEvent *) override;
 public:
-    WidgetManager(Point start_point, Point end_point):
-        AbstrWidget(start_point, end_point)
+    WidgetManager(Point start_point, Point end_point, WidgetType type,
+                  int (*controller) (Button*, WidgetManager*, Tool*)):
+        controller_(controller),
+        AbstrWidget(start_point, end_point),
+        type_(type)
+    {}
+    WidgetManager(Point start_point, Point end_point, WidgetType type):
+        AbstrWidget(start_point, end_point),
+        type_(type)
     {}
     int add_widget (WidgetManager* widget)
     {
+        if (!widgets_num_ && widgets_)
+        {
+            printf ("ERROR %d\n", __LINE__);
+        }
         widgets_num_++;
         widgets_ = (WidgetManager**) realloc (widgets_, widgets_num_ * sizeof(WidgetManager*));
         if (widgets_ == NULL)
@@ -42,6 +61,7 @@ public:
             return -1;
         }
         widgets_[widgets_num_ - 1] = widget;
+        widget->set_parent_widget(this);
         return 0;
     }
     WidgetManager** get_widgets (){return widgets_;}
@@ -51,6 +71,10 @@ public:
 
     int add_button (Button* button)
     {
+        if (!buttons_num_ && buttons_)
+        {
+            printf ("ERROR %d\n", __LINE__);
+        }
         buttons_num_++;
         buttons_ = (Button**) realloc (buttons_, buttons_num_ * sizeof(Button*));
         if (buttons_ == NULL)
@@ -68,9 +92,17 @@ public:
     WidgetManager* get_parent_widget (){return parent_widget_;}
     void set_parent_widget (WidgetManager* widget){parent_widget_ = widget;}
 
+    ToolManager* get_tool_manager (){return tool_manager_;}
+    void set_tool_manager (ToolManager* tool_manager){tool_manager_ = tool_manager;}
+
+    Point get_click_coordinate (){return mouse_click_coordinate_;}
+    void set_click_coordinate (Point click){mouse_click_coordinate_ = click;}
+
+
     int paint(QPainter*);
     int click_handler(Point);
 };
 
+int controller_paint (Button*, WidgetManager*, Tool*);
 
 #endif // WIDGET_H

@@ -38,6 +38,7 @@ int WidgetManager::click_handler(Point click)
         widget = widgets_[i];
         if (widget->is_my_area(click))
         {
+            widget->set_click_coordinate(click);
             widget->click_handler(click);
             return 0;
         }
@@ -49,15 +50,13 @@ int WidgetManager::click_handler(Point click)
         button = buttons_[i];
         if (button->is_my_area(click))
         {
-            widget->controller(button, this, button->get_tool());
+            widget->controller_(button, this, button->get_tool());
+            return 0;
         }
     }
 
-    return 0;
-}
+    widget->controller_(NULL, this, NULL);
 
-int WidgetManager::controller(Button* button, WidgetManager* widget, Tool* tool)
-{
     return 0;
 }
 
@@ -72,4 +71,21 @@ void WidgetManager::paintEvent(QPaintEvent *event)
 void WidgetManager::mousePressEvent(QMouseEvent *event)
 {
     click_handler(Point{double(event->x()), double(event->y())});
+}
+
+
+int controller_paint (Button* button, WidgetManager* widget, Tool* tool)
+{
+    if (button)
+    {
+        return 0;
+    }
+    if (widget)
+    {
+        QPainter painter(widget);
+        ToolManager* tool_manager = widget->get_tool_manager();
+        Tool* act_tool = tool_manager->get_active_tool();
+        act_tool->activity_(act_tool, &painter, widget->get_click_coordinate());
+    }
+    return 0;
 }
