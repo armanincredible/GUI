@@ -32,7 +32,7 @@ public:
 class Button : public AbstractButton
 {
 private:
-    Tool* my_tool_ = NULL;
+    Tool* my_tool_ = nullptr;
 public:
     Button(char* name, Vector color, Point start, Point end, int (*response)(Button*, void*)):
         AbstractButton(name, color, start, end, FormType{rectangle})
@@ -41,6 +41,11 @@ public:
     }
     Button(char* name, Vector color, Point start, Point end,  FormType form_type):
         AbstractButton(name, color, start, end, FormType{rectangle})
+    {}
+    Button(Point start, Point end, int (*response)(Button*, void*), Tool* tool):
+        AbstractButton(start, end),
+        my_tool_(tool),
+        response_(response)
     {}
     Button(Point start, Point end, int (*response)(Button*, void*)):
         AbstractButton(start, end),

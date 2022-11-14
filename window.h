@@ -49,6 +49,10 @@ public:
     {
         return start_point_;
     }
+    Point get_end_point()const
+    {
+        return end_point_;
+    }
     int is_my_area(Point click) const;
     int paintCoordinateSystem(QPainter*);
 };

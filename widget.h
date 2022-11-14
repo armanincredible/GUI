@@ -3,6 +3,7 @@
 #include "window.h"
 #include "button.h"
 #include "tool.h"
+#include <QtWidgets>
 
 enum WidgetType
 {
@@ -10,12 +11,13 @@ enum WidgetType
     MainWidget
 };
 
-class AbstrWidget : public CoordinateSystem, public QWidget
+class AbstrWidget : public CoordinateSystem, public QMainWindow
 {
     virtual void paintEvent(QPaintEvent *){};
     virtual void mousePressEvent(QMouseEvent *){};
 public:
     AbstrWidget(Point a, Point b):
+        QMainWindow(),
         CoordinateSystem(a, b)
     {}
 };
@@ -34,20 +36,38 @@ private:
     WidgetManager* parent_widget_ = NULL;
     char* widget_name = NULL;
 protected:
-    int (*controller_) (Button*, WidgetManager*, Tool*) = NULL;
     void paintEvent(QPaintEvent *) override;
     void mousePressEvent(QMouseEvent *) override;
 public:
+    int (*controller_) (Button*, WidgetManager*) = NULL;
+    int (*paint_function_)(WidgetManager*, QPainter*) = NULL;
+
     WidgetManager(Point start_point, Point end_point, WidgetType type,
-                  int (*controller) (Button*, WidgetManager*, Tool*)):
+                  int (*controller) (Button*, WidgetManager*),
+                  int (*paint_func) (WidgetManager*, QPainter*)):
         controller_(controller),
         AbstrWidget(start_point, end_point),
-        type_(type)
-    {}
-    WidgetManager(Point start_point, Point end_point, WidgetType type):
+        type_(type),
+        paint_function_(paint_func)
+    {
+        if (type != MainWidget)
+        {
+            setAttribute(Qt::WA_TransparentForMouseEvents);
+            //setUpdatesEnabled(true);
+        }
+    }
+    WidgetManager(Point start_point, Point end_point, WidgetType type,
+                  int (*paint_func) (WidgetManager*, QPainter*)):
         AbstrWidget(start_point, end_point),
-        type_(type)
-    {}
+        type_(type),
+        paint_function_(paint_func)
+    {
+        if (type != MainWidget)
+        {
+            setAttribute(Qt::WA_TransparentForMouseEvents);
+            //setUpdatesEnabled(true);
+        }
+    }
     int add_widget (WidgetManager* widget)
     {
         if (!widgets_num_ && widgets_)
@@ -98,11 +118,10 @@ public:
     Point get_click_coordinate (){return mouse_click_coordinate_;}
     void set_click_coordinate (Point click){mouse_click_coordinate_ = click;}
 
-
-    int paint(QPainter*);
     int click_handler(Point);
 };
 
-int controller_paint (Button*, WidgetManager*, Tool*);
+int controller_paint (Button*, WidgetManager*);
+int StandartPaint(WidgetManager*, QPainter*);
 
 #endif // WIDGET_H
