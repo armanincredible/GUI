@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>stream/line.jpg</file>
+        <file>stream/pencil.png</file>
+    </qresource>
+</RCC>

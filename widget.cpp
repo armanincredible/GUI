@@ -2,6 +2,8 @@
 #include "button.h"
 #include "tool.h"
 
+//WidgetManager* WidgetManager::cur_widget_painting_ = NULL;
+
 template < typename T >
 int find_element (T** objects, size_t objects_num, Point click)
 {
@@ -16,7 +18,7 @@ int find_element (T** objects, size_t objects_num, Point click)
     return -1;
 }
 
-int StandartPaint(WidgetManager* widget, QPainter* painter)
+int StandartWidgetPaint(WidgetManager* widget, QPainter* painter)
 {
     widget->paintCoordinateSystem(painter);
     for (int i = 0; i < widget->get_widgets_num(); i++)
@@ -28,7 +30,8 @@ int StandartPaint(WidgetManager* widget, QPainter* painter)
     for (int i = 0; i < widget->get_buttons_num(); i++)
     {
         Button* cur_button = (widget->get_buttons())[i];
-        cur_button->paintCoordinateSystem(painter);
+        cur_button->paint_function_(cur_button, painter);
+        //cur_button->paintCoordinateSystem(painter);
     }
     return 0;
 }
@@ -64,7 +67,6 @@ int WidgetManager::click_handler(Point click)
             widget->set_click_coordinate(click);
             if (widget->controller_)
             {
-                widget->repaint();
                 widget->controller_(NULL, widget);
             }
             else
@@ -84,33 +86,71 @@ int WidgetManager::click_handler(Point click)
 void WidgetManager::paintEvent(QPaintEvent *)
 {
     fprintf (stderr, "in paint event\n");
-    QPainter painter(this);
-    //paint_function_(this, &painter);
+    WidgetManager* widget = NULL;
+    if (active_widget_)
+    {
+        widget = active_widget_;
+    }
+    else
+    {
+        widget = this;
+    }
 
-    ToolManager* tool_manager = get_tool_manager();
+    QPainter painter(this->cast_to());
+
+    ToolManager* tool_manager = widget->get_tool_manager();
     if (tool_manager == nullptr)
     {
         //fprintf (stderr, "tool_manager null ptr\n");
-        paint_function_(this, &painter);
+        widget->paint_function_(this, &painter);
         return;
     }
     Tool* act_tool = tool_manager->get_active_tool();
     if (act_tool == nullptr)
     {
         //fprintf (stderr, "act_tool null ptr\n");
-        paint_function_(this, &painter);
+        widget->paint_function_(this, &painter);
         return;
     }
     fprintf (stderr, "make tool activity\n");
     act_tool->activity_(act_tool, &painter, get_click_coordinate());
 }
 
+void WidgetManager::mouseReleaseEvent(QMouseEvent *event)
+{
+    fprintf (stderr, "in mouse release event\n");
+    is_mouse_pressed_ = false;
+}
+
+void WidgetManager::mouseMoveEvent(QMouseEvent *event)
+{
+    fprintf (stderr, "in mouse move event\n");
+    Point click = Point{double(event->x()), double(event->y())};
+    set_click_coordinate(click);
+    is_mouse_pressed_ = true;
+    click_handler(click);
+}
+
 void WidgetManager::mousePressEvent(QMouseEvent *event)
 {
-    fprintf (stderr, "in mouse event\n");
+    fprintf (stderr, "in mouse press event\n");
     Point click = Point{double(event->x()), double(event->y())};
     set_click_coordinate(click);
     click_handler(click);
+}
+
+WidgetManager *WidgetManager::get_main_widget_()
+{
+    static WidgetManager* widget;
+    if (!widget)
+    {
+        widget = this;
+        while(widget->get_parent_widget())
+        {
+            widget  = widget->get_parent_widget();
+        }
+    }
+    return widget;
 }
 
 
@@ -125,12 +165,13 @@ int controller_paint (Button* button, WidgetManager* widget)
     if (widget)
     {
         fprintf (stderr, "going to repaint, %p\n", widget);
-        widget->setUpdatesEnabled(true);
-        //widget->setMinimumSize();
-        //widget->resize(100, 100);
-        widget->repaint();
-        //QAbstractScrollArea var(widget);
-        //var.viewport()->repaint();
+        //widget->setUpdatesEnabled(true);
+        //widget->cur_widget_painting_ = widget;
+        (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
+        (widget->get_main_widget_())->set_active_widget(widget);
+        (widget->get_main_widget_())->repaint_widget();
+        //(widget->get_main_widget_())->set_active_widget(NULL);
+        //(widget->get_main_widget_())->setAttribute(Qt::WA_OpaquePaintEvent, false);
     }
     return 0;
 }

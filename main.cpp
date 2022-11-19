@@ -6,31 +6,39 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    WidgetManager main_widget ({0, 0, 0}, {1920, 1080}, MainWidget, StandartPaint);
-    WidgetManager paint_widget ({200, 50, 0}, {1700, 500}, PaintWidget, controller_paint, StandartPaint);
+    WidgetManager main_widget ({0, 0, 0}, {1920, 1080}, NULL, StandartWidgetPaint);
+    WidgetManager paint_widget ({200, 50, 0}, {1700, 600}, &main_widget, controller_paint, StandartWidgetPaint);
+    WidgetManager palette_widget ({200, 800}, {1000, 1000}, &main_widget, controller_paint, StandartWidgetPaint);
+    WidgetManager tool_properties ({200, 50}, {1700, 100}, &main_widget, controller_paint, StandartWidgetPaint);
     //paint_widget.resize(100, 100);
     fprintf (stderr, "%p\n", &paint_widget);
 
-    Button first_button ({200, 800}, {400, 1000}, button_with_instrument);
-    Button second_button ({500, 800}, {700, 1000}, button_with_instrument);
-    Button third_button ({800, 800}, {1000, 1000}, button_with_instrument);
+    Button pen_button ({200, 800}, {400, 1000}, button_with_instrument, ButtonPaintFromPicture);
+    pen_button.set_image_path(":/stream/pencil.png");
+    Button line_button ({500, 800}, {700, 1000}, button_with_instrument, ButtonPaintFromPicture);
+    line_button.set_image_path(":/stream/line.jpg");
+    Button third_button ({800, 800}, {1000, 1000}, button_with_instrument, ButtonPaintFromPicture);
 
     Tool cist {paint_dot};
+    Tool line {paint_line};
     ToolManager tools {};
     tools.add_tool(&cist);
-    first_button.set_tool(&cist);
+    tools.add_tool(&line);
+    pen_button.set_tool(&cist);
+    line_button.set_tool(&line);
 
     main_widget.add_widget(&paint_widget);
+    main_widget.add_widget(&palette_widget);
+    main_widget.add_widget(&tool_properties);
+
     paint_widget.set_tool_manager(&tools);
-    paint_widget.add_button(&first_button);
-    paint_widget.add_button(&second_button);
-    paint_widget.add_button(&third_button);
+    palette_widget.add_button(&line_button);
+    palette_widget.add_button(&pen_button);
+    palette_widget.add_button(&third_button);
 
-    main_widget.resize(1920, 1080);
-    //txCreateWindow (800, 600);
-    //txLine (320, 290, 320, 220);
 
-    main_widget.show();
+    main_widget.resize_widget(1920, 1080);
+    main_widget.show_widget();
 
     return a.exec();
 
