@@ -1,6 +1,6 @@
 #include "button.h"
 #include "QPixmap"
-//#include "widget.h"
+#include "widget.h"
 
 int button_with_instrument (Button* my_button, void* obj)
 {
@@ -16,6 +16,11 @@ int button_with_instrument (Button* my_button, void* obj)
         fprintf (stderr, "button's tool cant become active\n");
         return -1;
     }
+    else
+    {
+        WidgetManager* widget = (WidgetManager*) obj;
+        widget->set_active_tool_manager((ToolManager*)tool->get_tool_manager());
+    }
     /*WidgetManager* widget = (WidgetManager*) obj;
     ToolManager* tools = widget->get_tool_manager();
     if (tools == NULL)
@@ -27,8 +32,44 @@ int button_with_instrument (Button* my_button, void* obj)
     return 0;
 }
 
+int button_change_color_tool (Button* my_button, void* obj)
+{
+    fprintf (stderr, "in button function interrupt\n");
+    WidgetManager* wid = (WidgetManager*)my_button->get_widget();
+    if (wid != obj)
+    {
+        fprintf (stderr, "button's widget and his real widget controller are not equal\n");
+        return -1;
+    }
+
+    Tool* tool = wid->get_active_tool_from_tool_manager();
+    if (tool)
+    {
+        tool->set_color(my_button->get_color());
+    }
+    else
+    {
+        fprintf (stderr, "hasnt activity tool\n");
+        return -1;
+    }
+
+    return 0;
+}
+
 int StandartButtonPaint (Button* button, QPainter* painter)
 {
+    if (button->is_colored())
+    {
+        int x0 = button->get_start_point().x;
+        int y0 = button->get_start_point().y;
+        //QPen pen(Qt::red);
+        Color color = button->get_color();
+        QBrush brush(QColor(color.r * 255, color.g * 255, color.b * 255));
+        //painter->setPen(pen);
+        painter->setBrush(brush);
+        painter->drawRect(x0, y0, button->width(), button->heigh());
+        return 0;
+    }
     button->paintCoordinateSystem(painter);
     return 0;
 }

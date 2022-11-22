@@ -98,22 +98,15 @@ void WidgetManager::paintEvent(QPaintEvent *)
 
     QPainter painter(this->cast_to());
 
-    ToolManager* tool_manager = widget->get_tool_manager();
-    if (tool_manager == nullptr)
+    Tool* tool = get_active_tool_from_tool_manager();
+    if (tool)
     {
-        //fprintf (stderr, "tool_manager null ptr\n");
-        widget->paint_function_(this, &painter);
-        return;
+        tool->activity_(tool, &painter, get_click_coordinate());
     }
-    Tool* act_tool = tool_manager->get_active_tool();
-    if (act_tool == nullptr)
+    else
     {
-        //fprintf (stderr, "act_tool null ptr\n");
         widget->paint_function_(this, &painter);
-        return;
     }
-    fprintf (stderr, "make tool activity\n");
-    act_tool->activity_(act_tool, &painter, get_click_coordinate());
 }
 
 void WidgetManager::mouseReleaseEvent(QMouseEvent *event)

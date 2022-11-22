@@ -5,12 +5,20 @@
 #include <cstdio>
 #include <cstdlib>
 
+struct Color
+{
+    double r = 0;
+    double g = 0;
+    double b = 0;
+};
+
 class Tool
 {
 private:
     Point last_click_ = {};
     int cur_num_click_ = 0;
     void* my_tool_manager_ = NULL;
+    Color color_{};
 public:
     int (*activity_)(Tool*, QPainter*, Point);
 
@@ -28,6 +36,9 @@ public:
     void* get_tool_manager (){return my_tool_manager_;}
     void set_tool_manager (void* val){my_tool_manager_ = val;}
     int set_active_tool_in_manager ();
+
+    void set_color(Color color){color_ = color;}
+    Color get_color(){return color_;}
 };
 
 class ToolManager

@@ -2,7 +2,8 @@
 
 int paint_dot (Tool* tool, QPainter* p, Point click)
 {
-    QPen paintpen(Qt::red);
+    Color color = tool->get_color();
+    QPen paintpen(QColor(color.r * 255, color.g * 255, color.b * 255));
     paintpen.setWidth(4);
     p->setPen(paintpen);
     p->drawPoint(click.x, click.y);

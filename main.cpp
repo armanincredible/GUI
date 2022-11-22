@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     WidgetManager main_widget ({0, 0, 0}, {1920, 1080}, NULL, StandartWidgetPaint);
-    WidgetManager paint_widget ({200, 50, 0}, {1700, 600}, &main_widget, controller_paint, StandartWidgetPaint);
+    WidgetManager paint_widget ({200, 100, 0}, {1700, 600}, &main_widget, controller_paint, StandartWidgetPaint);
     WidgetManager palette_widget ({200, 800}, {1000, 1000}, &main_widget, controller_paint, StandartWidgetPaint);
     WidgetManager tool_properties ({200, 50}, {1700, 100}, &main_widget, controller_paint, StandartWidgetPaint);
     //paint_widget.resize(100, 100);
@@ -18,6 +18,12 @@ int main(int argc, char *argv[])
     Button line_button ({500, 800}, {700, 1000}, button_with_instrument, ButtonPaintFromPicture);
     line_button.set_image_path(":/stream/line.jpg");
     Button third_button ({800, 800}, {1000, 1000}, button_with_instrument, ButtonPaintFromPicture);
+
+    Button red_color_button ({220, 60}, {300, 70}, button_change_color_tool, StandartButtonPaint);
+    WidgetManager red_color ({200, 50}, {300, 70}, &tool_properties, controller_paint, StandartWidgetPaint);
+    red_color.add_button(&red_color_button);
+    red_color_button.set_color({1, 0, 0});
+    tool_properties.add_widget(&red_color);
 
     Tool cist {paint_dot};
     Tool line {paint_line};
@@ -38,6 +44,10 @@ int main(int argc, char *argv[])
 
 
     main_widget.resize_widget(1920, 1080);
+    /*QLineEdit lin;
+    lin.setFrame(false);
+    lin.setText("hui");
+    lin.show();*/
     main_widget.show_widget();
 
     return a.exec();

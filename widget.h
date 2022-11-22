@@ -5,7 +5,14 @@
 #include "tool.h"
 #include <QtWidgets>
 
-class AbstrWidget : public CoordinateSystem, private QMainWindow
+enum TypeWidget
+{
+    RedColorProperty,
+    GreenColorProperty,
+    BlueColorProperty,
+};
+
+class AbstrWidget : public CoordinateSystem, public QMainWindow
 {
     virtual void paintEvent(QPaintEvent *){};
     virtual void mousePressEvent(QMouseEvent *){};
@@ -39,9 +46,10 @@ private:
     size_t buttons_num_ = 0;
     WidgetManager* parent_widget_ = NULL;
     char* widget_name = NULL;
-    WidgetManager* active_widget_ = NULL;
 
-    Tool* tool_ = NULL; // this ptr for tool, which properties widget shows
+    WidgetManager* active_widget_ = NULL;
+    ToolManager* active_tool_manager_ = NULL;
+    //Tool* tool_ = NULL; // this ptr for tool, which properties widget shows
 protected:
     void paintEvent(QPaintEvent *) override;
     void mousePressEvent(QMouseEvent *) override;
@@ -115,6 +123,7 @@ public:
             return -1;
         }
         buttons_[buttons_num_ - 1] = button;
+        button->set_widget(this);
         return 0;
     }
     Button** get_buttons (){return buttons_;}
@@ -128,27 +137,36 @@ public:
     ToolManager* get_tool_manager (){return tool_manager_;}
     void set_tool_manager (ToolManager* tool_manager){tool_manager_ = tool_manager;}
 
-    WidgetManager* get_active_widget_ (){return active_widget_;}
-    void set_active_widget (WidgetManager* tool_manager){active_widget_ = tool_manager;}
+    WidgetManager* get_main_widget_ ();
+
+    WidgetManager* get_active_widget (){return get_main_widget_()->active_widget_;}
+    void set_active_widget (WidgetManager* tool_manager){get_main_widget_()->active_widget_ = tool_manager;}
+
+    ToolManager* get_active_tool_manager (){return get_main_widget_()->active_tool_manager_;}
+    void set_active_tool_manager (ToolManager* tool_manager){get_main_widget_()->active_tool_manager_ = tool_manager;}
 
     Tool* get_active_tool_from_tool_manager()
     {
-        ToolManager* tools = NULL;
-        if ((tools = get_tool_manager()) != NULL)
+        if (get_active_tool_manager())
         {
-            return tools->get_active_tool();
+            return get_active_tool_manager()->get_active_tool();
         }
-        return NULL;
+        else
+        {
+            return NULL;
+        }
     }
     int set_active_tool_from_tool_manager(Tool* tool)
     {
-        ToolManager* tools = NULL;
-        if ((tools = get_tool_manager()) != NULL)
+        if (get_active_tool_manager())
         {
-            tools->set_active_tool(tool);
+            get_active_tool_manager()->set_active_tool(tool);
             return 0;
         }
-        return -1;
+        else
+        {
+            return -1;
+        }
     }
 
     bool is_mouse_pressed (){return is_mouse_pressed_;}
@@ -156,11 +174,8 @@ public:
     Point get_click_coordinate (){return mouse_click_coordinate_;}
     void set_click_coordinate (Point click){mouse_click_coordinate_ = click;}
 
-    WidgetManager* get_main_widget_ ();
-
     int click_handler(Point);
 };
-
 
 int controller_paint (Button*, WidgetManager*);
 int StandartWidgetPaint(WidgetManager*, QPainter*);
