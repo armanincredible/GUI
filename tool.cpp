@@ -18,7 +18,8 @@ int paint_line (Tool* tool, QPainter* p, Point click)
 {
     if (tool->get_cur_num_click())
     {
-        QPen paintpen(Qt::red);
+        Color color = tool->get_color();
+        QPen paintpen(QColor(color.r * 255, color.g * 255, color.b * 255));
         paintpen.setWidth(4);
         p->setPen(paintpen);
         p->drawLine(tool->get_last_click().x, tool->get_last_click().y,

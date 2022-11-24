@@ -36,6 +36,10 @@ int StandartWidgetPaint(WidgetManager* widget, QPainter* painter)
     return 0;
 }
 
+/*
+ * Function find object, which area was clicked and call controller
+ * If controller was called function return 0, another way -1
+ */
 int WidgetManager::click_handler(Point click)
 {
     WidgetManager* widget = NULL;
@@ -64,6 +68,11 @@ int WidgetManager::click_handler(Point click)
         if (widget->is_my_area(click))
         {
             fprintf (stderr, "found me widget %p\n", widget);
+            if (!widget->click_handler(click))
+            {
+                return 0;
+            }
+
             widget->set_click_coordinate(click);
             if (widget->controller_)
             {
@@ -75,12 +84,12 @@ int WidgetManager::click_handler(Point click)
             }
             return 0;
         }
-        widget->click_handler(click);
+        //widget->click_handler(click);
     }
     fprintf (stderr, "didnt find anything\n");
     //controller_(NULL, this);
 
-    return 0;
+    return -1;
 }
 
 void WidgetManager::paintEvent(QPaintEvent *)
@@ -98,9 +107,13 @@ void WidgetManager::paintEvent(QPaintEvent *)
 
     QPainter painter(this->cast_to());
 
-    Tool* tool = get_active_tool_from_tool_manager();
-    if (tool)
+    /*
+     * for this stage this method know only about active widget
+     * if it wants to paint it needs to have tool manager
+     */
+    if (widget->get_tool_manager())
     {
+        Tool* tool = get_active_tool_from_tool_manager();
         tool->activity_(tool, &painter, get_click_coordinate());
     }
     else
@@ -148,6 +161,28 @@ WidgetManager *WidgetManager::get_main_widget_()
 
 
 int controller_paint (Button* button, WidgetManager* widget)
+{
+    fprintf (stderr, "in contoller\n");
+    if (button)
+    {
+        button->response_(button, widget);
+        return 0;
+    }
+    if (widget)
+    {
+        fprintf (stderr, "going to repaint, %p\n", widget);
+        //widget->setUpdatesEnabled(true);
+        //widget->cur_widget_painting_ = widget;
+        (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
+        (widget->get_main_widget_())->set_active_widget(widget);
+        (widget->get_main_widget_())->repaint_widget();
+        //(widget->get_main_widget_())->set_active_widget(NULL);
+        //(widget->get_main_widget_())->setAttribute(Qt::WA_OpaquePaintEvent, false);
+    }
+    return 0;
+}
+
+int controller_only_buttons (Button* button, WidgetManager* widget)
 {
     fprintf (stderr, "in contoller\n");
     if (button)
