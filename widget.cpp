@@ -20,7 +20,23 @@ int find_element (T** objects, size_t objects_num, Point click)
 
 int StandartWidgetPaint(WidgetManager* widget, QPainter* painter)
 {
-    widget->paintCoordinateSystem(painter);
+    /*
+     * widget which we paint can be only active, non active and prev active
+     * if its prev active we repaint his lines in typical color
+     */
+    if (widget == widget->get_active_widget())
+    {
+        if (widget->get_prev_active_widget())
+        {
+            widget->get_prev_active_widget()->paintCoordinateSystem(painter);
+        }
+        widget->paintCoordinateSystem(painter, false, {0.2, 0.6, 0.2});
+    }
+    else
+    {
+        widget->paintCoordinateSystem(painter);
+    }
+    //widget->paintCoordinateSystem(painter);
     for (int i = 0; i < widget->get_widgets_num(); i++)
     {
         WidgetManager* cur_widget = (widget->get_widgets())[i];
@@ -53,9 +69,10 @@ int WidgetManager::click_handler(Point click)
             button = buttons[i];
             if (button->is_my_area(click))
             {
-                //fprintf (stderr, "found me button in widget %p\n", widget);
+                fprintf (stderr, "found me button in widget %p\n", widget);
                 if (widget->controller_)
                 {
+                    set_active_widget(widget);
                     widget->controller_(button, widget);
                 }
                 else
@@ -76,6 +93,7 @@ int WidgetManager::click_handler(Point click)
             widget->set_click_coordinate(click);
             if (widget->controller_)
             {
+                set_active_widget(widget);
                 widget->controller_(NULL, widget);
             }
             else
@@ -114,11 +132,17 @@ void WidgetManager::paintEvent(QPaintEvent *)
     if (widget->get_tool_manager())
     {
         Tool* tool = get_active_tool_from_tool_manager();
-        tool->activity_(tool, &painter, get_click_coordinate());
+        if (tool)
+        {
+            tool->activity_(tool, &painter, get_click_coordinate());
+        }
     }
     else
     {
-        widget->paint_function_(this, &painter);
+        /*
+         * paint only active widget or all widgets if active is null
+         */
+        widget->paint_function_(widget, &painter);
     }
 }
 
@@ -174,7 +198,7 @@ int controller_paint (Button* button, WidgetManager* widget)
         //widget->setUpdatesEnabled(true);
         //widget->cur_widget_painting_ = widget;
         (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
-        (widget->get_main_widget_())->set_active_widget(widget);
+        //widget->set_active_widget(widget);
         (widget->get_main_widget_())->repaint_widget();
         //(widget->get_main_widget_())->set_active_widget(NULL);
         //(widget->get_main_widget_())->setAttribute(Qt::WA_OpaquePaintEvent, false);

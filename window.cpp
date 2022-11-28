@@ -1,26 +1,29 @@
 #include "window.h"
 #include "math.h"
 
-int CoordinateSystem::paintCoordinateSystem (QPainter* painter)
+int CoordinateSystem::paintCoordinateSystem (QPainter* painter, bool with_area, Color color_line, Color color_area)
 {
     if (painter == NULL)
     {
         return -1;
     }
+
     int x0 = start_point_.x;
     int y0 = start_point_.y;
     int height = heigh();
     int widtht = width();
 
-    //int origin_x = origin_point_.x;
-    //int origin_y = origin_point_.y;
+    if (with_area == true)
+    {
+        QBrush brush(QColor(color_area.r * 255, color_area.g * 255, color_area.b * 255));
+        painter->setBrush(brush);
+    }
+
+    QPen paintpen(QColor(color_line.r * 255, color_line.g * 255, color_line.b * 255));
+    painter->setPen(paintpen);
 
     painter->drawRect(x0, y0, widtht, height);
-    /*painter->drawLine(origin_x, y0 + height,
-                     origin_x, y0);*/
 
-    /*painter->drawLine(x0,         origin_y,
-                     x0 + widtht, origin_y);*/
     return 0;
 }
 

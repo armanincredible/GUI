@@ -47,6 +47,7 @@ private:
     WidgetManager* parent_widget_ = NULL;
     char* widget_name = NULL;
 
+    WidgetManager* prev_active_widget_ = NULL;
     WidgetManager* active_widget_ = NULL;
     ToolManager* active_tool_manager_ = NULL;
     //Tool* tool_ = NULL; // this ptr for tool, which properties widget shows
@@ -140,7 +141,14 @@ public:
     WidgetManager* get_main_widget_ ();
 
     WidgetManager* get_active_widget (){return get_main_widget_()->active_widget_;}
-    void set_active_widget (WidgetManager* tool_manager){get_main_widget_()->active_widget_ = tool_manager;}
+    void set_active_widget (WidgetManager* tool_manager)
+    {
+        get_main_widget_()->prev_active_widget_ = get_main_widget_()->active_widget_;
+        get_main_widget_()->active_widget_ = tool_manager;
+    }
+
+    WidgetManager* get_prev_active_widget (){return get_main_widget_()->prev_active_widget_;}
+    void set_prev_active_widget (WidgetManager* tool_manager){get_main_widget_()->prev_active_widget_ = tool_manager;}
 
     ToolManager* get_active_tool_manager (){return get_main_widget_()->active_tool_manager_;}
     void set_active_tool_manager (ToolManager* tool_manager){get_main_widget_()->active_tool_manager_ = tool_manager;}

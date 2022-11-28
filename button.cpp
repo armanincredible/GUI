@@ -60,6 +60,7 @@ int StandartButtonPaint (Button* button, QPainter* painter)
 {
     if (button->is_colored())
     {
+        /*button->paintCoordinateSystem(painter, true, {0, 0, 0}, {color});
         int x0 = button->get_start_point().x;
         int y0 = button->get_start_point().y;
         //QPen pen(Qt::red);
@@ -67,7 +68,9 @@ int StandartButtonPaint (Button* button, QPainter* painter)
         QBrush brush(QColor(color.r * 255, color.g * 255, color.b * 255));
         //painter->setPen(pen);
         painter->setBrush(brush);
-        painter->drawRect(x0, y0, button->width(), button->heigh());
+        painter->drawRect(x0, y0, button->width(), button->heigh());*/
+        Color color = button->get_color();
+        button->paintCoordinateSystem(painter, true, {0, 0, 0}, {color});
         return 0;
     }
     button->paintCoordinateSystem(painter);

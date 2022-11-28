@@ -7,8 +7,6 @@
 #include "QWidget"
 #include "math.h"
 
-
-
 class CoordinateSystem
 {
 private:
@@ -54,7 +52,7 @@ public:
         return end_point_;
     }
     int is_my_area(Point click) const;
-    int paintCoordinateSystem(QPainter*);
+    int paintCoordinateSystem(QPainter*, bool = false, Color = {}, Color = {});
 };
 
 
