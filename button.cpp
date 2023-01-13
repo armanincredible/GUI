@@ -1,20 +1,21 @@
 #include "button.h"
 #include "QPixmap"
 #include "widget.h"
+#include "error.h"
 
 int button_with_instrument (Button* my_button, void* obj)
 {
-    fprintf (stderr, "in button function interrupt\n");
+    START_;
     Tool* tool = my_button->get_tool();
     if (tool == NULL)
     {
-        fprintf (stderr, "button's tool null ptr\n");
-        return -1;
+        PRINT_("button's tool null ptr\n");
+        END_(-1);
     }
     if (tool->set_active_tool_in_manager())
     {
-        fprintf (stderr, "button's tool cant become active\n");
-        return -1;
+        PRINT_("button's tool cant become active\n");
+        END_(-1);
     }
     else
     {
@@ -26,20 +27,20 @@ int button_with_instrument (Button* my_button, void* obj)
     if (tools == NULL)
     {
         fprintf (stderr, "tool manager in widget null ptr\n");
-        return -1;
+        END_(-1);
     }
     tools->set_active_tool(tool);*/
-    return 0;
+    END_(0);
 }
 
 int button_change_color_tool (Button* my_button, void* obj)
 {
-    fprintf (stderr, "in button function interrupt\n");
+    START_;
     WidgetManager* wid = (WidgetManager*)my_button->get_widget();
     if (wid != obj)
     {
-        fprintf (stderr, "button's widget and his real widget controller are not equal\n");
-        return -1;
+        PRINT_("button's widget and his real widget controller are not equal\n");
+        END_(-1);
     }
 
     Tool* tool = wid->get_active_tool_from_tool_manager();
@@ -49,15 +50,15 @@ int button_change_color_tool (Button* my_button, void* obj)
     }
     else
     {
-        fprintf (stderr, "hasnt activity tool\n");
-        return -1;
+        PRINT_("hasnt activity tool\n");
+        END_(-1);
     }
-
-    return 0;
+    END_(0);
 }
 
-int StandartButtonPaint (Button* button, QPainter* painter)
+int StandartButtonPaint (Button* button, QPainter* painter, void*)
 {
+    START_;
     if (button->is_colored())
     {
         /*button->paintCoordinateSystem(painter, true, {0, 0, 0}, {color});
@@ -71,14 +72,15 @@ int StandartButtonPaint (Button* button, QPainter* painter)
         painter->drawRect(x0, y0, button->width(), button->heigh());*/
         Color color = button->get_color();
         button->paintCoordinateSystem(painter, true, {0, 0, 0}, {color});
-        return 0;
+        END_(0);
     }
     button->paintCoordinateSystem(painter);
-    return 0;
+    END_(0);
 }
 
-int ButtonPaintFromPicture (Button* button, QPainter* painter)
+int ButtonPaintFromPicture (Button* button, QPainter* painter, void*)
 {
+    START_;
     if (button->get_image_path())
     {
         Point start {button->get_start_point()};
@@ -95,8 +97,8 @@ int ButtonPaintFromPicture (Button* button, QPainter* painter)
         if (pix.isNull())
         {
             painter->drawText(target, button->get_image_path(), Qt::AlignHCenter | Qt::AlignVCenter);
-            fprintf (stderr, "Pixmap is emty because file image doesnt exit\n");
-            return 0;
+            PRINT_("Pixmap is emty because file image doesnt exit\n");
+            END_(0);
         }
 
         QRect source(0, 0, (pix.size()).width(), (pix.size()).height());
@@ -104,13 +106,13 @@ int ButtonPaintFromPicture (Button* button, QPainter* painter)
 
         painter->drawPixmap(target, pix, source);
         button->paintCoordinateSystem(painter);
-        return 0;
+        END_(0);
     }
     else
     {
-        fprintf (stderr, "buttons image path is NULL\n");
+        PRINT_("buttons image path is NULL\n");
         button->paintCoordinateSystem(painter);// add text with info abput file name
     }
 
-    return -1;
+    END_(-1);
 }

@@ -33,6 +33,11 @@ set(PROJECT_SOURCES
     widget.cpp
     tool.h
     tool.cpp
+    texteditor.h
+    texteditor.cpp
+    error.h
+    error.cpp
+    error_kernel.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

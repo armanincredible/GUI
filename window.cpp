@@ -7,9 +7,9 @@ int CoordinateSystem::paintCoordinateSystem (QPainter* painter, bool with_area, 
     {
         return -1;
     }
-
     int x0 = start_point_.x;
     int y0 = start_point_.y;
+
     int height = heigh();
     int widtht = width();
 

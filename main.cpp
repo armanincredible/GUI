@@ -2,6 +2,7 @@
 #include "widget.h"
 #include "button.h"
 #include "tool.h"
+#include "texteditor.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,8 +20,10 @@ int main(int argc, char *argv[])
     line_button.set_image_path(":/stream/line.jpg");
     Button third_button ({800, 800}, {1000, 1000}, button_with_instrument, ButtonPaintFromPicture);
 
-    Button red_color_button ({220, 60}, {300, 70}, button_change_color_tool, StandartButtonPaint);
+    Button red_color_button ({250, 50}, {300, 70}, button_change_color_tool, StandartButtonPaint);
     WidgetManager red_color ({200, 50}, {300, 70}, &tool_properties, controller_paint, StandartWidgetPaint);
+    TextEditor red_color_editor ({200, 50}, {250, 70}, &red_color, NULL, StandartTextEditorPaint);
+    red_color.add_text_editor(&red_color_editor);
     red_color.add_button(&red_color_button);
     red_color_button.set_color({1, 0, 0});
     tool_properties.add_widget(&red_color);

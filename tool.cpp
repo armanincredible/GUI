@@ -1,7 +1,9 @@
 #include "tool.h"
+#include "error.h"
 
 int paint_dot (Tool* tool, QPainter* p, Point click)
 {
+    START_;
     Color color = tool->get_color();
     QPen paintpen(QColor(color.r * 255, color.g * 255, color.b * 255));
     paintpen.setWidth(4);
@@ -11,11 +13,13 @@ int paint_dot (Tool* tool, QPainter* p, Point click)
     //p->drawLine(10, 20, 40, 50);
 
     tool->set_last_click(click);
-    return 0;
+
+    END_(0);
 }
 
 int paint_line (Tool* tool, QPainter* p, Point click)
 {
+    START_;
     if (tool->get_cur_num_click())
     {
         Color color = tool->get_color();
@@ -25,21 +29,26 @@ int paint_line (Tool* tool, QPainter* p, Point click)
         p->drawLine(tool->get_last_click().x, tool->get_last_click().y,
                     click.x, click.y);
         tool->set_cur_num_click(0);
-        return 0;
+
+        END_(0);
     }
 
     tool->add_cur_num_click();
     tool->set_last_click(click);
-    return 0;
+
+    END_(0);
 }
 
 int Tool::set_active_tool_in_manager()
 {
+    START_;
     if (my_tool_manager_)
     {
         ToolManager* tools = (ToolManager*) my_tool_manager_;
         tools->set_active_tool(this);
-        return 0;
+
+        END_(0);
     }
-    return -1;
+
+    END_(-1);
 }

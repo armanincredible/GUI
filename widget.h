@@ -18,6 +18,7 @@ class AbstrWidget : public CoordinateSystem, public QMainWindow
     virtual void mousePressEvent(QMouseEvent *){};
     virtual void mouseReleaseEvent(QMouseEvent *){};
     virtual void mouseMoveEvent(QMouseEvent *){};
+    virtual void keyPressEvent(QKeyEvent *){};
 public:
     QPaintDevice* cast_to(){return (QPaintDevice*)this;}
     void repaint_widget(){repaint();}
@@ -38,12 +39,22 @@ class WidgetManager : public AbstrWidget
 private:
     Point mouse_click_coordinate_ = {};
     bool is_mouse_pressed_ = 0;
+
+    bool need_in_key_events_ = false;
+    bool is_text_editor_ = false;
+
     WidgetManager** widgets_ = NULL;
     size_t widgets_num_ = 0;
+
     ToolManager* tool_manager_ = NULL;
     size_t tools_num_ = 0;
+
     Button** buttons_ = NULL;
     size_t buttons_num_ = 0;
+
+    void** text_editors_ = NULL;
+    size_t text_editors_num_ = 0;
+
     WidgetManager* parent_widget_ = NULL;
     char* widget_name = NULL;
 
@@ -52,18 +63,24 @@ private:
     ToolManager* active_tool_manager_ = NULL;
     //Tool* tool_ = NULL; // this ptr for tool, which properties widget shows
 protected:
+    void keyPressEvent(QKeyEvent *) override;
     void paintEvent(QPaintEvent *) override;
     void mousePressEvent(QMouseEvent *) override;
     void mouseReleaseEvent(QMouseEvent *) override;
     void mouseMoveEvent(QMouseEvent *) override;
 public:
-    int (*controller_) (Button*, WidgetManager*) = NULL;
-    int (*paint_function_)(WidgetManager*, QPainter*) = NULL;
+    int (*controller_) (Button*, WidgetManager*, void*) = NULL;
+    int (*paint_function_)(WidgetManager*, QPainter*, void*) = NULL;
+
+    bool is_need_in_key_events(){return need_in_key_events_;}
+    bool is_text_editor(){return is_text_editor_;}
+    void set_is_text_editor(bool val){is_text_editor_ = val;}
+    void set_need_in_key_events(bool val){need_in_key_events_ = val;}
 
     WidgetManager(Point start_point, Point end_point,
                   WidgetManager* parent_widget,
-                  int (*controller) (Button*, WidgetManager*),
-                  int (*paint_func) (WidgetManager*, QPainter*)):
+                  int (*controller) (Button*, WidgetManager*, void*),
+                  int (*paint_func) (WidgetManager*, QPainter*, void*)):
         parent_widget_(parent_widget),
         controller_(controller),
         AbstrWidget(start_point, end_point),
@@ -78,7 +95,7 @@ public:
 
     WidgetManager(Point start_point, Point end_point,
                   WidgetManager* parent_widget,
-                  int (*paint_func) (WidgetManager*, QPainter*)):
+                  int (*paint_func) (WidgetManager*, QPainter*, void*)):
         parent_widget_(parent_widget),
         AbstrWidget(start_point, end_point),
         paint_function_(paint_func)
@@ -89,6 +106,28 @@ public:
             //setVisible(true);
         }
     }
+
+    int add_text_editor (WidgetManager* text_editor)
+    {
+        if (!text_editors_num_ && text_editors_)
+        {
+            printf ("ERROR %d\n", __LINE__);
+        }
+        text_editors_num_++;
+        text_editors_ = (void**) realloc (text_editors_, text_editors_num_ * sizeof(void*));
+        if (text_editors_ == NULL)
+        {
+            return -1;
+        }
+        text_editors_[text_editors_num_ - 1] = text_editor;
+        text_editor->set_parent_widget(this);
+        text_editor->set_need_in_key_events(true);
+        return 0;
+    }
+    void** get_text_editors (){return text_editors_;}
+    void set_text_editors (void** text_editors){text_editors_ = text_editors;}
+    void set_text_editors_num (size_t num){text_editors_num_ = num;}
+    size_t get_text_editors_num (){return text_editors_num_;}
 
     int add_widget (WidgetManager* widget)
     {
@@ -185,7 +224,7 @@ public:
     int click_handler(Point);
 };
 
-int controller_paint (Button*, WidgetManager*);
-int StandartWidgetPaint(WidgetManager*, QPainter*);
+int controller_paint (Button*, WidgetManager*, void*);
+int StandartWidgetPaint(WidgetManager*, QPainter*, void*);
 
 #endif // WIDGET_H
