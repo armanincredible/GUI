@@ -12,6 +12,12 @@ enum TypeWidget
     BlueColorProperty,
 };
 
+enum CurrentWork
+{
+    ChangeActiveTool,
+    Nothing
+};
+
 class AbstrWidget : public CoordinateSystem, public QMainWindow
 {
     virtual void paintEvent(QPaintEvent *){};
@@ -37,6 +43,8 @@ public:
 class WidgetManager : public AbstrWidget
 {
 private:
+    CurrentWork cur_work_state_ = CurrentWork::Nothing;
+
     Point mouse_click_coordinate_ = {};
     bool is_mouse_pressed_ = 0;
 
@@ -69,8 +77,11 @@ protected:
     void mouseReleaseEvent(QMouseEvent *) override;
     void mouseMoveEvent(QMouseEvent *) override;
 public:
-    int (*controller_) (Button*, WidgetManager*, void*) = NULL;
-    int (*paint_function_)(WidgetManager*, QPainter*, void*) = NULL;
+    int (*controller_) (Button*, WidgetManager*) = NULL;
+    int (*paint_function_)(WidgetManager*, QPainter*) = NULL;
+
+    CurrentWork get_work_state(void){return get_main_widget_()->cur_work_state_;}
+    void set_work_state(CurrentWork state){get_main_widget_()->cur_work_state_ = state;}
 
     bool is_need_in_key_events(){return need_in_key_events_;}
     bool is_text_editor(){return is_text_editor_;}
@@ -79,8 +90,8 @@ public:
 
     WidgetManager(Point start_point, Point end_point,
                   WidgetManager* parent_widget,
-                  int (*controller) (Button*, WidgetManager*, void*),
-                  int (*paint_func) (WidgetManager*, QPainter*, void*)):
+                  int (*controller) (Button*, WidgetManager*),
+                  int (*paint_func) (WidgetManager*, QPainter*)):
         parent_widget_(parent_widget),
         controller_(controller),
         AbstrWidget(start_point, end_point),
@@ -95,7 +106,7 @@ public:
 
     WidgetManager(Point start_point, Point end_point,
                   WidgetManager* parent_widget,
-                  int (*paint_func) (WidgetManager*, QPainter*, void*)):
+                  int (*paint_func) (WidgetManager*, QPainter*)):
         parent_widget_(parent_widget),
         AbstrWidget(start_point, end_point),
         paint_function_(paint_func)
@@ -224,7 +235,7 @@ public:
     int click_handler(Point);
 };
 
-int controller_paint (Button*, WidgetManager*, void*);
-int StandartWidgetPaint(WidgetManager*, QPainter*, void*);
+int controller_paint (Button*, WidgetManager*);
+int StandartWidgetPaint(WidgetManager*, QPainter*);
 
 #endif // WIDGET_H

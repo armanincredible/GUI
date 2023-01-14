@@ -21,6 +21,20 @@ int button_with_instrument (Button* my_button, void* obj)
     {
         WidgetManager* widget = (WidgetManager*) obj;
         widget->set_active_tool_manager((ToolManager*)tool->get_tool_manager());
+
+        PRINT_("im here\n");
+
+        widget->set_work_state(CurrentWork::ChangeActiveTool);
+        WidgetManager* saved_widget = widget->get_active_widget();
+        widget->set_active_widget(NULL);
+
+        (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
+        (widget->get_main_widget_())->repaint_widget();
+
+        widget->set_work_state(CurrentWork::Nothing);
+        widget->set_active_widget(saved_widget);
+
+        END_(0);
     }
     /*WidgetManager* widget = (WidgetManager*) obj;
     ToolManager* tools = widget->get_tool_manager();
@@ -47,6 +61,17 @@ int button_change_color_tool (Button* my_button, void* obj)
     if (tool)
     {
         tool->set_color(my_button->get_color());
+
+        WidgetManager* widget = (WidgetManager*) obj;
+        widget->set_work_state(CurrentWork::ChangeActiveTool);
+        WidgetManager* saved_widget = widget->get_active_widget();
+        widget->set_active_widget(NULL);
+
+        (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
+        (widget->get_main_widget_())->repaint_widget();
+
+        widget->set_work_state(CurrentWork::Nothing);
+        widget->set_active_widget(saved_widget);
     }
     else
     {
@@ -56,7 +81,7 @@ int button_change_color_tool (Button* my_button, void* obj)
     END_(0);
 }
 
-int StandartButtonPaint (Button* button, QPainter* painter, void*)
+int StandartButtonPaint (Button* button, QPainter* painter)
 {
     START_;
     if (button->is_colored())
@@ -78,7 +103,7 @@ int StandartButtonPaint (Button* button, QPainter* painter, void*)
     END_(0);
 }
 
-int ButtonPaintFromPicture (Button* button, QPainter* painter, void*)
+int ButtonPaintFromPicture (Button* button, QPainter* painter)
 {
     START_;
     if (button->get_image_path())

@@ -24,7 +24,7 @@ extern Logger logger_of_project;
 
 #define END_(val)                                                                          \
         do{                                                                           \
-             logger_of_project.end_function(__func__, __FILE__, __LINE__);       \
+             logger_of_project.end_function(__func__, __FILE__, __LINE__);          \
              return val;                                                               \
         }while(0)
 

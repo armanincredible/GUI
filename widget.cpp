@@ -20,14 +20,14 @@ int find_element (T** objects, size_t objects_num, Point click)
     return -1;
 }
 
-int StandartWidgetPaint(WidgetManager* widget, QPainter* painter, void * text_editor)
+int StandartWidgetPaint(WidgetManager* widget, QPainter* painter)
 {
     START_;
     /*
      * widget which we paint can be only active, non active and prev active
      * if its prev active we repaint his lines in typical color
      */
-    if (widget == widget->get_active_widget())
+    /*if (widget == widget->get_active_widget())
     {
         if (widget->get_prev_active_widget())
         {
@@ -38,25 +38,25 @@ int StandartWidgetPaint(WidgetManager* widget, QPainter* painter, void * text_ed
     else
     {
         widget->paintCoordinateSystem(painter);
-    }
-    //widget->paintCoordinateSystem(painter);
+    }*/
+    widget->paintCoordinateSystem(painter);
     for (int i = 0; i < widget->get_widgets_num(); i++)
     {
         WidgetManager* cur_widget = (widget->get_widgets())[i];
-        cur_widget->paint_function_(cur_widget, painter, text_editor);
+        cur_widget->paint_function_(cur_widget, painter);
         //widgets_[i]->paint(painter);
     }
     for (int i = 0; i < widget->get_text_editors_num(); i++)
     {
         TextEditor** text_editors = (TextEditor**)widget->get_text_editors();
         TextEditor* text_editor = text_editors[i];
-        text_editor->paint_function_(text_editor, painter, text_editor);
+        text_editor->paint_function_(text_editor, painter);
         //widgets_[i]->paint(painter);
     }
     for (int i = 0; i < widget->get_buttons_num(); i++)
     {
         Button* cur_button = (widget->get_buttons())[i];
-        cur_button->paint_function_(cur_button, painter, text_editor);
+        cur_button->paint_function_(cur_button, painter);
         //cur_button->paintCoordinateSystem(painter);
     }
     END_(0);
@@ -84,7 +84,7 @@ int WidgetManager::click_handler(Point click)
                 if (widget->controller_)
                 {
                     set_active_widget(widget);
-                    widget->controller_(button, widget, NULL);
+                    widget->controller_(button, widget);
                 }
                 else
                 {
@@ -101,10 +101,10 @@ int WidgetManager::click_handler(Point click)
             if (text_editor->is_my_area(click))
             {
                 PRINT_("found me text_editor in widget %p\n", widget);
-                if (widget->controller_)
+                if (text_editor->controller_)
                 {
                     set_active_widget(text_editor);
-                    widget->controller_(NULL, NULL, text_editor);
+                    text_editor->controller_(NULL, text_editor);
                 }
                 else
                 {
@@ -125,7 +125,7 @@ int WidgetManager::click_handler(Point click)
             if (widget->controller_)
             {
                 set_active_widget(widget);
-                widget->controller_(NULL, widget, NULL);
+                widget->controller_(NULL, widget);
             }
             else
             {
@@ -149,8 +149,18 @@ void WidgetManager::keyPressEvent(QKeyEvent *event)
         if (active_widget->is_text_editor())
         {
             TextEditor* text_editor = (TextEditor*) active_widget;
-            text_editor->set_data(*((char*)event->text().data()));
-            //PRINT_("%c\n", *((char*)event->text().data()));
+            if (event->key() == Qt::Key_Backspace)
+            {
+                text_editor->delete_data();
+            }
+            else if (event->key() == 0x01000004)//enter
+            {
+                text_editor->controller_(NULL, text_editor);
+            }
+            else
+            {
+                text_editor->set_data(*((char*)event->text().data()));
+            }
         }
     }
     END_();
@@ -188,7 +198,7 @@ void WidgetManager::paintEvent(QPaintEvent *)
         /*
          * paint only active widget or all widgets if active is null
          */
-        widget->paint_function_(widget, &painter, NULL);
+        widget->paint_function_(widget, &painter);
     }
     END_();
 }
@@ -235,7 +245,7 @@ WidgetManager *WidgetManager::get_main_widget_()
 }
 
 
-int controller_paint (Button* button, WidgetManager* widget, void* text_editor_void)
+int controller_paint (Button* button, WidgetManager* widget)
 {
     START_;
     if (button)
@@ -246,23 +256,15 @@ int controller_paint (Button* button, WidgetManager* widget, void* text_editor_v
     if (widget)
     {
         PRINT_("going to repaint, %p\n", widget);
-        //widget->setUpdatesEnabled(true);
-        //widget->cur_widget_painting_ = widget;
+
         (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
-        //widget->set_active_widget(widget);
         (widget->get_main_widget_())->repaint_widget();
-        //(widget->get_main_widget_())->set_active_widget(NULL);
-        //(widget->get_main_widget_())->setAttribute(Qt::WA_OpaquePaintEvent, false);
     }
-    TextEditor* text_editor = (TextEditor*) text_editor_void;
-    if (text_editor)
-    {
-        //text_editor->set_data();
-    }
+
     END_(0);
 }
 
-int controller_only_buttons (Button* button, WidgetManager* widget, void*)
+int controller_only_buttons (Button* button, WidgetManager* widget)
 {
     START_;
     if (button)
@@ -273,13 +275,9 @@ int controller_only_buttons (Button* button, WidgetManager* widget, void*)
     if (widget)
     {
         PRINT_("going to repaint, %p\n", widget);
-        //widget->setUpdatesEnabled(true);
-        //widget->cur_widget_painting_ = widget;
+
         (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
-        //(widget->get_main_widget_())->set_active_widget(widget);
         (widget->get_main_widget_())->repaint_widget();
-        //(widget->get_main_widget_())->set_active_widget(NULL);
-        //(widget->get_main_widget_())->setAttribute(Qt::WA_OpaquePaintEvent, false);
     }
     END_(0);
 }

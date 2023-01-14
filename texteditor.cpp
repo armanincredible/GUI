@@ -1,39 +1,60 @@
 ﻿#include "texteditor.h"
 #include "error.h"
+#include <stdlib.h>
 
-int StandartTextEditorPaint(WidgetManager* widget, QPainter* painter, void* text_editor_void)
+int StandartTextEditorPaint(WidgetManager* widget, QPainter* painter)
 {
     START_;
 
-    TextEditor* text_editor = (TextEditor*) widget;
-    StandartWidgetPaint(text_editor, painter, NULL);
-
-
-    int x0 = text_editor->get_start_point().x;
-    int y0 = text_editor->get_start_point().y;
-    int height = text_editor->CoordinateSystem::heigh();
-    int widtht = text_editor->CoordinateSystem::width();
-
-
-    painter->drawText(x0, y0, widtht, height, Qt::AlignCenter, text_editor->get_data());
-
-    /*if (text_editor->get_str())
+    if (widget && widget->is_text_editor() && painter)
     {
-        painter->drawText(x0, y0, widtht, height, Qt::AlignCenter, text_editor->get_str());
+        TextEditor* text_editor = (TextEditor*) widget;
+        StandartWidgetPaint(text_editor, painter);
+
+        Tool* tool = widget->get_active_tool_from_tool_manager();
+        if (tool && (widget->get_work_state() == CurrentWork::ChangeActiveTool))
+        {
+            text_editor->delete_all_data();
+            InfoType type = text_editor->get_info_type();
+            int val = 0;
+            if (type == InfoType::RedColor)
+            {
+                val = tool->get_color().r * 100;
+            }
+            if (type == InfoType::BlueColor)
+            {
+                val = tool->get_color().b * 100;
+            }
+            if (type == InfoType::GreenColor)
+            {
+                val = tool->get_color().g * 100;
+            }
+            char data[4] = "";
+            sprintf(data, "%d", val);
+
+            if (text_editor->get_data_len() <= 4)
+            {
+                text_editor->realloc_data(10);
+            }
+            strcpy(text_editor->get_data(), data);
+        }
+
+        int x0 = text_editor->get_start_point().x;
+        int y0 = text_editor->get_start_point().y;
+        int height = text_editor->CoordinateSystem::heigh();
+        int widtht = text_editor->CoordinateSystem::width();
+
+        QBrush brush(QColor(255, 255, 255));
+        painter->setBrush(brush);
+        painter->drawRect(x0, y0, widtht, height);
+
+        painter->drawText(x0, y0, widtht, height, Qt::AlignCenter, text_editor->get_data());
+        END_(0);
     }
-    else if (text_editor->get_num())
+    else
     {
-        int num_digits = text_editor->get_num()/10 + 1;
-        char* str = (char*) calloc (num_digits, sizeof(char));// its must be changed cause we can calloc in init function once time
-        CHECK_NULL_PTR_(str, "calloc is failed", -1);
-
-        sprintf(str, "%d", (int)text_editor->get_num());
-        painter->drawText(x0, y0, widtht, height, Qt::AlignCenter, str);
-
-        free(str);
-    }*/
-
-    END_(0);
+        END_(-1);
+    }
 }
 
 static void clear_stdin()
@@ -48,8 +69,38 @@ int TextEditor::delete_data()
     {
         data_[--cur_symb_] = ' ';
     }
+
+    get_main_widget_()->set_flag(Qt::WA_OpaquePaintEvent);
+    get_main_widget_()->repaint_widget();
+
     END_(0);
 }
+
+int TextEditor::delete_all_data()
+{
+    START_;
+    while (cur_symb_ != 0)
+    {
+        data_[--cur_symb_] = ' ';
+    }
+
+    END_(0);
+}
+
+int TextEditor::realloc_data(int new_size)
+{
+    START_;
+    if (data_ == NULL)
+    {
+        END_(-1);
+    }
+
+    data_ = (char*) realloc(data_, new_size);
+    CHECK_NULL_PTR_(data_, "realloc is failed", -1);
+
+    END_(0);
+}
+
 
 int TextEditor::set_data(const int symb)
 {
@@ -71,6 +122,52 @@ int TextEditor::set_data(const int symb)
     get_main_widget_()->set_flag(Qt::WA_OpaquePaintEvent);
     get_main_widget_()->repaint_widget();
 
+    END_(0);
+}
+
+int controller_text_editor(Button* button, WidgetManager* widget)
+{
+    START_;
+    if (button)
+    {
+        button->response_(button, widget);
+        END_(0);
+    }
+    if (widget)
+    {
+        if (widget->is_text_editor())
+        {
+            TextEditor* text_editor = (TextEditor*) widget;
+            Tool* tool = widget->get_active_tool_from_tool_manager();
+            if (tool)
+            {
+                Color color = tool->get_color();
+                //atoi(text_editor->get_data());
+                int new_color = atoi(text_editor->get_data());
+                //fprintf (stderr, "%d", new_color);
+                PRINT_("new_color %d\n", new_color);
+
+                InfoType type = text_editor->get_info_type();
+                if (type == InfoType::RedColor)
+                {
+                    color.r = (double) new_color / 100;
+                }
+                if (type == InfoType::BlueColor)
+                {
+                    color.b = (double) new_color / 100;
+                }
+                if (type == InfoType::GreenColor)
+                {
+                    color.g = (double) new_color / 100;
+                }
+                tool->set_color(color);
+            }
+            END_(0);
+        }
+        PRINT_("going to repaint, %p\n", widget);
+        (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
+        (widget->get_main_widget_())->repaint_widget();
+    }
     END_(0);
 }
 

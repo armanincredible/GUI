@@ -9,6 +9,13 @@ enum TextType
     num,
 };
 
+enum InfoType
+{
+    RedColor,
+    BlueColor,
+    GreenColor,
+};
+
 class TextEditor : public WidgetManager
 {
 private:
@@ -17,18 +24,20 @@ private:
     char* data_ = NULL;
     int data_len_ = 0;
     int cur_symb_ = 0;
+    InfoType info_type_ = {};
 
 public:
 
     TextEditor(Point start_point, Point end_point,
                WidgetManager* parent_widget,
-               int (*controller) (Button*, WidgetManager*, void*),
-               int (*paint_func) (WidgetManager*, QPainter*, void*)):
-        WidgetManager(start_point, end_point, parent_widget, controller, paint_func)
+               int (*controller) (Button*, WidgetManager*),
+               int (*paint_func) (WidgetManager*, QPainter*),
+               InfoType info_type):
+        WidgetManager(start_point, end_point, parent_widget, controller, paint_func),
+        info_type_(info_type)
     {
         data_ = (char*) calloc (10, sizeof(char));
         data_len_ = 10;
-        data_[0] = 'a';
         set_is_text_editor(true);
     }
 
@@ -46,9 +55,15 @@ public:
 
     int get_cur_symb_index(){return cur_symb_;}
     void set_cur_symb_index(int index){cur_symb_ = index;}
+
+    InfoType get_info_type(){return info_type_;}
+    void set_info_type(InfoType type){info_type_ = type;}
+
+    int realloc_data(int new_size);
+    int delete_all_data();
 };
 
-int StandartTextEditorPaint(WidgetManager*, QPainter*, void*);
-int controller_text_editor(Button*, WidgetManager*, void*);
+int StandartTextEditorPaint(WidgetManager*, QPainter*);
+int controller_text_editor(Button*, WidgetManager*);
 
 #endif // TEXTEDITOR_H

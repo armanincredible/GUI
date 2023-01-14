@@ -51,7 +51,7 @@ public:
     {}
     Button(Point start, Point end, Tool* tool,
            int (*response)(Button*, void*),
-           int (*paint_function)(Button*, QPainter*, void*)):
+           int (*paint_function)(Button*, QPainter*)):
         AbstractButton(start, end),
         my_tool_(tool),
         response_(response),
@@ -59,13 +59,13 @@ public:
     {}
     Button(Point start, Point end,
            int (*response)(Button*, void*),
-           int (*paint_function)(Button*, QPainter*, void*)):
+           int (*paint_function)(Button*, QPainter*)):
         AbstractButton(start, end),
         response_(response),
         paint_function_(paint_function)
     {}
 
-    int (*paint_function_)(Button*, QPainter*, void*) = NULL;
+    int (*paint_function_)(Button*, QPainter*) = NULL;
     int (*response_)(Button*, void*);
 
     void set_tool(Tool* tool){my_tool_ = tool;}
@@ -84,7 +84,7 @@ public:
 
 int button_with_instrument (Button*, void*);
 int button_change_color_tool (Button*, void*);
-int StandartButtonPaint (Button*, QPainter*, void*);
-int ButtonPaintFromPicture (Button*, QPainter*, void *);
+int StandartButtonPaint (Button*, QPainter*);
+int ButtonPaintFromPicture (Button*, QPainter*);
 
 #endif // BUTTON_H

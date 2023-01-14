@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
     Button red_color_button ({250, 50}, {300, 70}, button_change_color_tool, StandartButtonPaint);
     WidgetManager red_color ({200, 50}, {300, 70}, &tool_properties, controller_paint, StandartWidgetPaint);
-    TextEditor red_color_editor ({200, 50}, {250, 70}, &red_color, NULL, StandartTextEditorPaint);
+    TextEditor red_color_editor ({200, 50}, {250, 70}, &red_color, controller_text_editor, StandartTextEditorPaint, InfoType::RedColor);
     red_color.add_text_editor(&red_color_editor);
     red_color.add_button(&red_color_button);
     red_color_button.set_color({1, 0, 0});
