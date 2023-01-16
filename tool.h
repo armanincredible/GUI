@@ -12,6 +12,7 @@ private:
     int cur_num_click_ = 0;
     void* my_tool_manager_ = NULL;
     Color color_{};
+    int thickness_ = 4;
 public:
     int (*activity_)(Tool*, QPainter*, Point);
 
@@ -32,6 +33,9 @@ public:
 
     void set_color(Color color){color_ = color;}
     Color get_color(){return color_;}
+
+    void set_thickness(int val){thickness_ = val;}
+    int get_thickness(){return thickness_;}
 };
 
 class ToolManager
@@ -63,5 +67,6 @@ public:
 
 int paint_dot (Tool*, QPainter*, Point);
 int paint_line (Tool*, QPainter*, Point);
+int clear_dot (Tool*, QPainter*, Point);
 
 #endif // TOOL_H

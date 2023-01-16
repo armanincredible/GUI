@@ -233,6 +233,8 @@ public:
     void set_click_coordinate (Point click){mouse_click_coordinate_ = click;}
 
     int click_handler(Point);
+
+    int repaint_all_with_state(CurrentWork);
 };
 
 int controller_paint (Button*, WidgetManager*);

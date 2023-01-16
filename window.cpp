@@ -13,6 +13,8 @@ int CoordinateSystem::paintCoordinateSystem (QPainter* painter, bool with_area, 
     int height = heigh();
     int widtht = width();
 
+    QBrush brush_save  = painter->brush();
+
     if (with_area == true)
     {
         QBrush brush(QColor(color_area.r * 255, color_area.g * 255, color_area.b * 255));
@@ -24,6 +26,7 @@ int CoordinateSystem::paintCoordinateSystem (QPainter* painter, bool with_area, 
 
     painter->drawRect(x0, y0, widtht, height);
 
+    painter->setBrush(brush_save);
     return 0;
 }
 

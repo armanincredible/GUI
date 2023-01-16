@@ -29,6 +29,10 @@ int StandartTextEditorPaint(WidgetManager* widget, QPainter* painter)
             {
                 val = tool->get_color().g * 100;
             }
+            if (type == InfoType::Thickness)
+            {
+                val = tool->get_thickness();
+            }
             char data[4] = "";
             sprintf(data, "%d", val);
 
@@ -44,9 +48,7 @@ int StandartTextEditorPaint(WidgetManager* widget, QPainter* painter)
         int height = text_editor->CoordinateSystem::heigh();
         int widtht = text_editor->CoordinateSystem::width();
 
-        QBrush brush(QColor(255, 255, 255));
-        painter->setBrush(brush);
-        painter->drawRect(x0, y0, widtht, height);
+        text_editor->paintCoordinateSystem(painter, true, {0, 0, 0}, {1, 1, 1});
 
         painter->drawText(x0, y0, widtht, height, Qt::AlignCenter, text_editor->get_data());
         END_(0);
@@ -74,6 +76,11 @@ int TextEditor::delete_data()
     get_main_widget_()->repaint_widget();
 
     END_(0);
+}
+
+int TextEditor::get_num()
+{
+    return atoi(get_data());
 }
 
 int TextEditor::delete_all_data()
@@ -141,26 +148,32 @@ int controller_text_editor(Button* button, WidgetManager* widget)
             Tool* tool = widget->get_active_tool_from_tool_manager();
             if (tool)
             {
-                Color color = tool->get_color();
-                //atoi(text_editor->get_data());
-                int new_color = atoi(text_editor->get_data());
-                //fprintf (stderr, "%d", new_color);
-                PRINT_("new_color %d\n", new_color);
-
                 InfoType type = text_editor->get_info_type();
-                if (type == InfoType::RedColor)
+                if (type == InfoType::Thickness)
                 {
-                    color.r = (double) new_color / 100;
+                    int thickness = text_editor->get_num();
+                    tool->set_thickness(thickness);
                 }
-                if (type == InfoType::BlueColor)
+                else
                 {
-                    color.b = (double) new_color / 100;
+                    Color color = tool->get_color();
+                    int new_color = text_editor->get_num();
+                    PRINT_("new_color %d\n", new_color);
+
+                    if (type == InfoType::RedColor)
+                    {
+                        color.r = (double) new_color / 100;
+                    }
+                    if (type == InfoType::BlueColor)
+                    {
+                        color.b = (double) new_color / 100;
+                    }
+                    if (type == InfoType::GreenColor)
+                    {
+                        color.g = (double) new_color / 100;
+                    }
+                    tool->set_color(color);
                 }
-                if (type == InfoType::GreenColor)
-                {
-                    color.g = (double) new_color / 100;
-                }
-                tool->set_color(color);
             }
             END_(0);
         }
@@ -170,4 +183,3 @@ int controller_text_editor(Button* button, WidgetManager* widget)
     }
     END_(0);
 }
-

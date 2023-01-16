@@ -32,6 +32,16 @@ public:
     const char* get_name() const {return name_;}
 };
 
+enum ButtonTargetType
+{
+    ChangeRedColor,
+    ChangeGrenColor,
+    ChangeBlueColor,
+    ChangeTool,
+    ChangeThickness,
+    Nothingb
+};
+
 class Button : public AbstractButton
 {
 private:
@@ -40,6 +50,7 @@ private:
     const char* image_path_ = NULL;
     Color color_{};
     bool is_colored_ = false;
+    ButtonTargetType target_type_ = ButtonTargetType::Nothingb; //TODO! need to reefactor mb delete
 public:
     Button(char* name, Vector color, Point start, Point end, int (*response)(Button*, void*)):
         AbstractButton(name, color, start, end, FormType{rectangle})
@@ -51,7 +62,9 @@ public:
     {}
     Button(Point start, Point end, Tool* tool,
            int (*response)(Button*, void*),
-           int (*paint_function)(Button*, QPainter*)):
+           int (*paint_function)(Button*, QPainter*),
+           ButtonTargetType type):
+        target_type_(type),
         AbstractButton(start, end),
         my_tool_(tool),
         response_(response),
@@ -59,7 +72,9 @@ public:
     {}
     Button(Point start, Point end,
            int (*response)(Button*, void*),
-           int (*paint_function)(Button*, QPainter*)):
+           int (*paint_function)(Button*, QPainter*),
+           ButtonTargetType type):
+        target_type_(type),
         AbstractButton(start, end),
         response_(response),
         paint_function_(paint_function)
@@ -80,10 +95,15 @@ public:
     void set_color(Color color){color_ = color; is_colored_ = true;}
     Color get_color(){return color_;}
     bool is_colored(){return is_colored_;}
+
+    ButtonTargetType get_target_type(){return target_type_;}
+    void set_target_type(ButtonTargetType type){target_type_ = type;}
 };
 
 int button_with_instrument (Button*, void*);
 int button_change_color_tool (Button*, void*);
+int button_change_thickness (Button*, void*);
+
 int StandartButtonPaint (Button*, QPainter*);
 int ButtonPaintFromPicture (Button*, QPainter*);
 

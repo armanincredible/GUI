@@ -2,6 +2,7 @@
 #include "QPixmap"
 #include "widget.h"
 #include "error.h"
+//#include "texteditor.h"
 
 int button_with_instrument (Button* my_button, void* obj)
 {
@@ -24,15 +25,7 @@ int button_with_instrument (Button* my_button, void* obj)
 
         PRINT_("im here\n");
 
-        widget->set_work_state(CurrentWork::ChangeActiveTool);
-        WidgetManager* saved_widget = widget->get_active_widget();
-        widget->set_active_widget(NULL);
-
-        (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
-        (widget->get_main_widget_())->repaint_widget();
-
-        widget->set_work_state(CurrentWork::Nothing);
-        widget->set_active_widget(saved_widget);
+        widget->repaint_all_with_state(CurrentWork::ChangeActiveTool);
 
         END_(0);
     }
@@ -63,15 +56,33 @@ int button_change_color_tool (Button* my_button, void* obj)
         tool->set_color(my_button->get_color());
 
         WidgetManager* widget = (WidgetManager*) obj;
-        widget->set_work_state(CurrentWork::ChangeActiveTool);
-        WidgetManager* saved_widget = widget->get_active_widget();
-        widget->set_active_widget(NULL);
+        widget->repaint_all_with_state(CurrentWork::ChangeActiveTool);
+    }
+    else
+    {
+        PRINT_("hasnt activity tool\n");
+        END_(-1);
+    }
+    END_(0);
+}
 
-        (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
-        (widget->get_main_widget_())->repaint_widget();
+int button_change_thickness (Button* my_button, void* obj)
+{
+    START_;
+    WidgetManager* wid = (WidgetManager*)my_button->get_widget();
+    if (wid != obj)
+    {
+        PRINT_("button's widget and his real widget controller are not equal\n");
+        END_(-1);
+    }
 
-        widget->set_work_state(CurrentWork::Nothing);
-        widget->set_active_widget(saved_widget);
+    Tool* tool = wid->get_active_tool_from_tool_manager();
+    if (tool)
+    {
+        WidgetManager* widget = (WidgetManager*) obj;
+        tool->set_thickness(4);
+
+        widget->repaint_all_with_state(CurrentWork::ChangeActiveTool);
     }
     else
     {
@@ -86,15 +97,6 @@ int StandartButtonPaint (Button* button, QPainter* painter)
     START_;
     if (button->is_colored())
     {
-        /*button->paintCoordinateSystem(painter, true, {0, 0, 0}, {color});
-        int x0 = button->get_start_point().x;
-        int y0 = button->get_start_point().y;
-        //QPen pen(Qt::red);
-        Color color = button->get_color();
-        QBrush brush(QColor(color.r * 255, color.g * 255, color.b * 255));
-        //painter->setPen(pen);
-        painter->setBrush(brush);
-        painter->drawRect(x0, y0, button->width(), button->heigh());*/
         Color color = button->get_color();
         button->paintCoordinateSystem(painter, true, {0, 0, 0}, {color});
         END_(0);

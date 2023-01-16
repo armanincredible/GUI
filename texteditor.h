@@ -14,6 +14,7 @@ enum InfoType
     RedColor,
     BlueColor,
     GreenColor,
+    Thickness,
 };
 
 class TextEditor : public WidgetManager
@@ -48,7 +49,7 @@ public:
     int init_data ();
 
     char* get_data(){return data_;}
-    double get_num(){return num_;}
+    int get_num();
 
     int get_data_len(){return data_len_;}
     void set_data_len(int len){data_len_ = len;}

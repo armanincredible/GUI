@@ -140,6 +140,7 @@ int WidgetManager::click_handler(Point click)
     END_(-1);
 }
 
+
 void WidgetManager::keyPressEvent(QKeyEvent *event)
 {
     START_;
@@ -201,6 +202,23 @@ void WidgetManager::paintEvent(QPaintEvent *)
         widget->paint_function_(widget, &painter);
     }
     END_();
+}
+
+int WidgetManager::repaint_all_with_state(CurrentWork state)
+{
+    START_;
+
+    set_work_state(state);
+    WidgetManager* saved_widget = get_active_widget();
+    set_active_widget(NULL);
+
+    (get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
+    (get_main_widget_())->repaint_widget();
+
+    set_work_state(CurrentWork::Nothing);
+    set_active_widget(saved_widget);
+
+    END_(0);
 }
 
 void WidgetManager::mouseReleaseEvent(QMouseEvent *event)
