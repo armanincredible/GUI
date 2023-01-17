@@ -2,7 +2,7 @@
 #include "button.h"
 #include "tool.h"
 #include "error.h"
-#include "texteditor.h"
+//#include "texteditor.h"
 
 //WidgetManager* WidgetManager::cur_widget_painting_ = NULL;
 
@@ -20,7 +20,7 @@ int find_element (T** objects, size_t objects_num, Point click)
     return -1;
 }
 
-int StandartWidgetPaint(WidgetManager* widget, QPainter* painter)
+int StandardWidgetPaint(WidgetManager* widget, QPainter* painter)
 {
     START_;
     /*
@@ -46,13 +46,7 @@ int StandartWidgetPaint(WidgetManager* widget, QPainter* painter)
         cur_widget->paint_function_(cur_widget, painter);
         //widgets_[i]->paint(painter);
     }
-    for (int i = 0; i < widget->get_text_editors_num(); i++)
-    {
-        TextEditor** text_editors = (TextEditor**)widget->get_text_editors();
-        TextEditor* text_editor = text_editors[i];
-        text_editor->paint_function_(text_editor, painter);
-        //widgets_[i]->paint(painter);
-    }
+
     for (int i = 0; i < widget->get_buttons_num(); i++)
     {
         Button* cur_button = (widget->get_buttons())[i];
@@ -93,26 +87,7 @@ int WidgetManager::click_handler(Point click)
                 END_(0);
             }
         }
-        TextEditor* text_editor = NULL;
-        TextEditor** text_editors = (TextEditor**)widget->get_text_editors();
-        for (int i = 0; i < widget->get_text_editors_num(); i++)
-        {
-            text_editor = text_editors[i];
-            if (text_editor->is_my_area(click))
-            {
-                PRINT_("found me text_editor in widget %p\n", widget);
-                if (text_editor->controller_)
-                {
-                    set_active_widget(text_editor);
-                    text_editor->controller_(NULL, text_editor);
-                }
-                else
-                {
-                    PRINT_("contoller function null ptr\n");
-                }
-                END_(0);
-            }
-        }
+
         if (widget->is_my_area(click))
         {
             PRINT_("found me widget %p\n", widget);
@@ -140,29 +115,15 @@ int WidgetManager::click_handler(Point click)
     END_(-1);
 }
 
-
 void WidgetManager::keyPressEvent(QKeyEvent *event)
 {
     START_;
+    //PRINT_("%p is this widget", this);
     WidgetManager* active_widget = get_active_widget();
     if (active_widget && active_widget->is_need_in_key_events())
     {
-        if (active_widget->is_text_editor())
-        {
-            TextEditor* text_editor = (TextEditor*) active_widget;
-            if (event->key() == Qt::Key_Backspace)
-            {
-                text_editor->delete_data();
-            }
-            else if (event->key() == 0x01000004)//enter
-            {
-                text_editor->controller_(NULL, text_editor);
-            }
-            else
-            {
-                text_editor->set_data(*((char*)event->text().data()));
-            }
-        }
+            active_widget->set_key_event(event);
+            active_widget->controller_(NULL, active_widget);
     }
     END_();
 }
@@ -208,15 +169,27 @@ int WidgetManager::repaint_all_with_state(CurrentWork state)
 {
     START_;
 
-    set_work_state(state);
     WidgetManager* saved_widget = get_active_widget();
     set_active_widget(NULL);
+
+    repaint_with_state(state);
+
+    set_active_widget(saved_widget);
+
+    END_(0);
+}
+
+int WidgetManager::repaint_with_state(CurrentWork state)
+{
+    START_;
+
+    CurrentWork state_saved = get_work_state();
+    set_work_state(state);
 
     (get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
     (get_main_widget_())->repaint_widget();
 
-    set_work_state(CurrentWork::Nothing);
-    set_active_widget(saved_widget);
+    set_work_state(state_saved);
 
     END_(0);
 }
@@ -235,6 +208,23 @@ void WidgetManager::mouseMoveEvent(QMouseEvent *event)
     set_click_coordinate(click);
     is_mouse_pressed_ = true;
     click_handler(click);
+    END_();
+}
+
+void WidgetManager::timerEvent(QTimerEvent *event)
+{
+    START_;
+
+    CurrentWork state_saved = get_work_state();
+    set_work_state(CurrentWork::TimerReaction);
+    //fprintf (stderr, "%p TIMER EVENT\n", this);
+
+    if (timer_controller_)
+    {
+        timer_controller_(this);
+    }
+
+    set_work_state(state_saved);
     END_();
 }
 

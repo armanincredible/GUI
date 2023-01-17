@@ -15,7 +15,7 @@ public:
         {
             fprintf(stderr, " ");
         }
-        fprintf(stderr, "start: %s %s %d\n", function_name, file_name, line);
+        fprintf(stderr, "start: %s %s:%d\n", function_name, file_name, line);
         shift_ += 2;
         return;
     }
@@ -25,7 +25,7 @@ public:
         {
             fprintf(stderr, " ");
         }
-        fprintf(stderr, "end: %s %s %d\n", function_name, file_name, line);
+        fprintf(stderr, "end: %s %s:%d\n", function_name, file_name, line);
         shift_ -= 2;
         return;
     }

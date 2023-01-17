@@ -63,6 +63,14 @@ public:
     }
     Tool* get_active_tool (){return cur_work_tool_;}
     void set_active_tool (Tool* tool){cur_work_tool_ = tool;}
+
+    ~ToolManager()
+    {
+        if (tools_)
+        {
+            free(tools_);
+        }
+    }
 };
 
 int paint_dot (Tool*, QPainter*, Point);

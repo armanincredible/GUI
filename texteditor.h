@@ -17,6 +17,8 @@ enum InfoType
     Thickness,
 };
 
+/*TODO timer interrut controller for text_editor and data to class*/
+
 class TextEditor : public WidgetManager
 {
 private:
@@ -26,6 +28,8 @@ private:
     int data_len_ = 0;
     int cur_symb_ = 0;
     InfoType info_type_ = {};
+
+    int* conrtol_variable_ = NULL;
 
 public:
 
@@ -38,8 +42,8 @@ public:
         info_type_(info_type)
     {
         data_ = (char*) calloc (10, sizeof(char));
+        set_need_in_key_events(true);
         data_len_ = 10;
-        set_is_text_editor(true);
     }
 
     void set_str (const char* str){str_ = str;}
@@ -62,9 +66,13 @@ public:
 
     int realloc_data(int new_size);
     int delete_all_data();
+
+    int* get_control_variable(void){return conrtol_variable_;}
+    void set_control_variable(int* var){conrtol_variable_ = var;}
 };
 
-int StandartTextEditorPaint(WidgetManager*, QPainter*);
+int StandardTextEditorPaint(WidgetManager*, QPainter*); //rename
 int controller_text_editor(Button*, WidgetManager*);
+int timer_controller_text_editor(WidgetManager* widget);
 
 #endif // TEXTEDITOR_H

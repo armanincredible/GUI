@@ -2,14 +2,14 @@
 #include "error.h"
 #include <stdlib.h>
 
-int StandartTextEditorPaint(WidgetManager* widget, QPainter* painter)
+int StandardTextEditorPaint(WidgetManager* widget, QPainter* painter)
 {
     START_;
 
-    if (widget && widget->is_text_editor() && painter)
+    if (widget && painter)
     {
         TextEditor* text_editor = (TextEditor*) widget;
-        StandartWidgetPaint(text_editor, painter);
+        StandardWidgetPaint(text_editor, painter);
 
         Tool* tool = widget->get_active_tool_from_tool_manager();
         if (tool && (widget->get_work_state() == CurrentWork::ChangeActiveTool))
@@ -51,6 +51,38 @@ int StandartTextEditorPaint(WidgetManager* widget, QPainter* painter)
         text_editor->paintCoordinateSystem(painter, true, {0, 0, 0}, {1, 1, 1});
 
         painter->drawText(x0, y0, widtht, height, Qt::AlignCenter, text_editor->get_data());
+
+        QKeyEvent* key_event = text_editor->get_key_event();
+        if ((widget->get_work_state() == CurrentWork::TimerReaction) && (widget->get_active_widget() == text_editor))
+        {
+            if (key_event && (key_event->key() == 0x01000004))
+            {
+                END_(0);
+            }
+            static bool line_need = true;
+
+            int y0 = text_editor->get_start_point().y;
+            int x1 = text_editor->get_end_point().x - 3;
+            int y1 = text_editor->get_end_point().y;
+
+            QPen paintpen;
+            QPen savedpaintpen = painter->pen();
+            if (!line_need)
+            {
+                paintpen.setColor(QColor(255, 255, 255));
+                line_need = true;
+            }
+            else
+            {
+                line_need = false;
+            }
+            paintpen.setWidth(2);
+            painter->setPen(paintpen);
+            painter->drawLine(x1, y0 + 3,
+                        x1, y1 - 3);
+            painter->setPen(savedpaintpen);
+        }
+
         END_(0);
     }
     else
@@ -132,6 +164,8 @@ int TextEditor::set_data(const int symb)
     END_(0);
 }
 
+//add variable into text_editor which it contolls
+
 int controller_text_editor(Button* button, WidgetManager* widget)
 {
     START_;
@@ -142,10 +176,22 @@ int controller_text_editor(Button* button, WidgetManager* widget)
     }
     if (widget)
     {
-        if (widget->is_text_editor())
+        TextEditor* text_editor = (TextEditor*) widget;
+        Tool* tool = widget->get_active_tool_from_tool_manager();
+
+        QKeyEvent* key_event = text_editor->get_key_event();
+
+        if (!key_event)
         {
-            TextEditor* text_editor = (TextEditor*) widget;
-            Tool* tool = widget->get_active_tool_from_tool_manager();
+            END_(0);
+        }
+
+        if (key_event->key() == Qt::Key_Backspace)
+        {
+            text_editor->delete_data();
+        }
+        else if (key_event->key() == 0x01000004)
+        {
             if (tool)
             {
                 InfoType type = text_editor->get_info_type();
@@ -175,9 +221,28 @@ int controller_text_editor(Button* button, WidgetManager* widget)
                     tool->set_color(color);
                 }
             }
-            END_(0);
+
+            (text_editor->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
+            (text_editor->get_main_widget_())->repaint_widget();
+
+            text_editor->set_active_widget(NULL);
         }
-        PRINT_("going to repaint, %p\n", widget);
+        else
+        {
+            text_editor->set_data(*((char*)key_event->text().data()));
+        }
+
+        text_editor->set_key_event(NULL);
+    }
+    END_(0);
+}
+
+int timer_controller_text_editor(WidgetManager* widget)
+{
+    START_;
+    static bool paint_line = true;
+    if (widget == widget->get_active_widget())
+    {
         (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
         (widget->get_main_widget_())->repaint_widget();
     }

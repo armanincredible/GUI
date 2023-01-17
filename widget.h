@@ -15,6 +15,7 @@ enum TypeWidget
 enum CurrentWork
 {
     ChangeActiveTool,
+    TimerReaction,
     Nothing
 };
 
@@ -25,6 +26,7 @@ class AbstrWidget : public CoordinateSystem, public QMainWindow
     virtual void mouseReleaseEvent(QMouseEvent *){};
     virtual void mouseMoveEvent(QMouseEvent *){};
     virtual void keyPressEvent(QKeyEvent *){};
+    virtual void timerEvent(QTimerEvent *){};
 public:
     QPaintDevice* cast_to(){return (QPaintDevice*)this;}
     void repaint_widget(){repaint();}
@@ -45,11 +47,11 @@ class WidgetManager : public AbstrWidget
 private:
     CurrentWork cur_work_state_ = CurrentWork::Nothing;
 
+    QKeyEvent* key_event_ = NULL;
     Point mouse_click_coordinate_ = {};
     bool is_mouse_pressed_ = 0;
 
     bool need_in_key_events_ = false;
-    bool is_text_editor_ = false;
 
     WidgetManager** widgets_ = NULL;
     size_t widgets_num_ = 0;
@@ -60,32 +62,39 @@ private:
     Button** buttons_ = NULL;
     size_t buttons_num_ = 0;
 
-    void** text_editors_ = NULL;
-    size_t text_editors_num_ = 0;
-
     WidgetManager* parent_widget_ = NULL;
     char* widget_name = NULL;
 
     WidgetManager* prev_active_widget_ = NULL;
     WidgetManager* active_widget_ = NULL;
     ToolManager* active_tool_manager_ = NULL;
-    //Tool* tool_ = NULL; // this ptr for tool, which properties widget shows
+
+    int timerId_ = 0;
+    bool is_has_timer_ = false;
+
 protected:
     void keyPressEvent(QKeyEvent *) override;
     void paintEvent(QPaintEvent *) override;
     void mousePressEvent(QMouseEvent *) override;
     void mouseReleaseEvent(QMouseEvent *) override;
     void mouseMoveEvent(QMouseEvent *) override;
+    void timerEvent(QTimerEvent *) override;
 public:
     int (*controller_) (Button*, WidgetManager*) = NULL;
     int (*paint_function_)(WidgetManager*, QPainter*) = NULL;
+    int (*timer_controller_) (WidgetManager*) = NULL;
+
+    void set_timer_controller(int (*timer_controller) (WidgetManager*))
+    {
+        timer_controller_ = timer_controller;
+    }
+
+    void set_timer(int millisec){timerId_ = startTimer(1000); is_has_timer_ = true;}
 
     CurrentWork get_work_state(void){return get_main_widget_()->cur_work_state_;}
     void set_work_state(CurrentWork state){get_main_widget_()->cur_work_state_ = state;}
 
     bool is_need_in_key_events(){return need_in_key_events_;}
-    bool is_text_editor(){return is_text_editor_;}
-    void set_is_text_editor(bool val){is_text_editor_ = val;}
     void set_need_in_key_events(bool val){need_in_key_events_ = val;}
 
     WidgetManager(Point start_point, Point end_point,
@@ -100,6 +109,7 @@ public:
         if (parent_widget)
         {
             set_flag(Qt::WA_TransparentForMouseEvents);
+            setEnabled(false);
             //setVisible(true);
         }
     }
@@ -114,31 +124,26 @@ public:
         if (parent_widget)
         {
             set_flag(Qt::WA_TransparentForMouseEvents);
+            setEnabled(false);
             //setVisible(true);
         }
     }
 
-    int add_text_editor (WidgetManager* text_editor)
+    ~WidgetManager()
     {
-        if (!text_editors_num_ && text_editors_)
+        if (widgets_)
         {
-            printf ("ERROR %d\n", __LINE__);
+            free(widgets_);
         }
-        text_editors_num_++;
-        text_editors_ = (void**) realloc (text_editors_, text_editors_num_ * sizeof(void*));
-        if (text_editors_ == NULL)
+        if (buttons_)
         {
-            return -1;
+            free(buttons_);
         }
-        text_editors_[text_editors_num_ - 1] = text_editor;
-        text_editor->set_parent_widget(this);
-        text_editor->set_need_in_key_events(true);
-        return 0;
+        if (is_has_timer_)
+        {
+            killTimer(timerId_);
+        }
     }
-    void** get_text_editors (){return text_editors_;}
-    void set_text_editors (void** text_editors){text_editors_ = text_editors;}
-    void set_text_editors_num (size_t num){text_editors_num_ = num;}
-    size_t get_text_editors_num (){return text_editors_num_;}
 
     int add_widget (WidgetManager* widget)
     {
@@ -232,12 +237,16 @@ public:
     Point get_click_coordinate (){return mouse_click_coordinate_;}
     void set_click_coordinate (Point click){mouse_click_coordinate_ = click;}
 
+    void set_key_event(QKeyEvent* event){key_event_ = event;}
+    QKeyEvent* get_key_event(void){return key_event_;}
+
     int click_handler(Point);
 
     int repaint_all_with_state(CurrentWork);
+    int repaint_with_state(CurrentWork);
 };
 
 int controller_paint (Button*, WidgetManager*);
-int StandartWidgetPaint(WidgetManager*, QPainter*);
+int StandardWidgetPaint(WidgetManager*, QPainter*);
 
 #endif // WIDGET_H

@@ -4,7 +4,7 @@
 #include "error.h"
 //#include "texteditor.h"
 
-int button_with_instrument (Button* my_button, void* obj)
+int button_with_instrument (Button* my_button, WidgetManager* obj)
 {
     START_;
     Tool* tool = my_button->get_tool();
@@ -29,18 +29,10 @@ int button_with_instrument (Button* my_button, void* obj)
 
         END_(0);
     }
-    /*WidgetManager* widget = (WidgetManager*) obj;
-    ToolManager* tools = widget->get_tool_manager();
-    if (tools == NULL)
-    {
-        fprintf (stderr, "tool manager in widget null ptr\n");
-        END_(-1);
-    }
-    tools->set_active_tool(tool);*/
     END_(0);
 }
 
-int button_change_color_tool (Button* my_button, void* obj)
+int button_change_color_tool (Button* my_button, WidgetManager* obj)
 {
     START_;
     WidgetManager* wid = (WidgetManager*)my_button->get_widget();
@@ -66,7 +58,7 @@ int button_change_color_tool (Button* my_button, void* obj)
     END_(0);
 }
 
-int button_change_thickness (Button* my_button, void* obj)
+int button_change_thickness (Button* my_button, WidgetManager* obj)
 {
     START_;
     WidgetManager* wid = (WidgetManager*)my_button->get_widget();
@@ -92,7 +84,7 @@ int button_change_thickness (Button* my_button, void* obj)
     END_(0);
 }
 
-int StandartButtonPaint (Button* button, QPainter* painter)
+int StandardButtonPaint (Button* button, QPainter* painter)
 {
     START_;
     if (button->is_colored())

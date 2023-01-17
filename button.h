@@ -32,15 +32,9 @@ public:
     const char* get_name() const {return name_;}
 };
 
-enum ButtonTargetType
-{
-    ChangeRedColor,
-    ChangeGrenColor,
-    ChangeBlueColor,
-    ChangeTool,
-    ChangeThickness,
-    Nothingb
-};
+
+class WidgetManager;
+
 
 class Button : public AbstractButton
 {
@@ -50,9 +44,9 @@ private:
     const char* image_path_ = NULL;
     Color color_{};
     bool is_colored_ = false;
-    ButtonTargetType target_type_ = ButtonTargetType::Nothingb; //TODO! need to reefactor mb delete
+
 public:
-    Button(char* name, Vector color, Point start, Point end, int (*response)(Button*, void*)):
+    Button(char* name, Vector color, Point start, Point end, int (*response)(Button*, WidgetManager*)):
         AbstractButton(name, color, start, end, FormType{rectangle})
     {
         response_ = response;
@@ -61,27 +55,23 @@ public:
         AbstractButton(name, color, start, end, FormType{rectangle})
     {}
     Button(Point start, Point end, Tool* tool,
-           int (*response)(Button*, void*),
-           int (*paint_function)(Button*, QPainter*),
-           ButtonTargetType type):
-        target_type_(type),
+           int (*response)(Button*, WidgetManager*),
+           int (*paint_function)(Button*, QPainter*)):
         AbstractButton(start, end),
         my_tool_(tool),
         response_(response),
         paint_function_(paint_function)
     {}
     Button(Point start, Point end,
-           int (*response)(Button*, void*),
-           int (*paint_function)(Button*, QPainter*),
-           ButtonTargetType type):
-        target_type_(type),
+           int (*response)(Button*, WidgetManager*),
+           int (*paint_function)(Button*, QPainter*)):
         AbstractButton(start, end),
         response_(response),
         paint_function_(paint_function)
     {}
 
     int (*paint_function_)(Button*, QPainter*) = NULL;
-    int (*response_)(Button*, void*);
+    int (*response_)(Button*, WidgetManager*);
 
     void set_tool(Tool* tool){my_tool_ = tool;}
     Tool* get_tool() const {return my_tool_;}
@@ -95,16 +85,13 @@ public:
     void set_color(Color color){color_ = color; is_colored_ = true;}
     Color get_color(){return color_;}
     bool is_colored(){return is_colored_;}
-
-    ButtonTargetType get_target_type(){return target_type_;}
-    void set_target_type(ButtonTargetType type){target_type_ = type;}
 };
 
-int button_with_instrument (Button*, void*);
-int button_change_color_tool (Button*, void*);
-int button_change_thickness (Button*, void*);
+int button_with_instrument (Button*, WidgetManager*);
+int button_change_color_tool (Button*, WidgetManager*);
+int button_change_thickness (Button*, WidgetManager*);
 
-int StandartButtonPaint (Button*, QPainter*);
+int StandardButtonPaint (Button*, QPainter*);
 int ButtonPaintFromPicture (Button*, QPainter*);
 
 #endif // BUTTON_H
