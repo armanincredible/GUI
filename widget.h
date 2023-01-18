@@ -83,6 +83,7 @@ public:
     int (*controller_) (Button*, WidgetManager*) = NULL;
     int (*paint_function_)(WidgetManager*, QPainter*) = NULL;
     int (*timer_controller_) (WidgetManager*) = NULL;
+    int (*last_activity_) (WidgetManager*) = NULL;
 
     void set_timer_controller(int (*timer_controller) (WidgetManager*))
     {

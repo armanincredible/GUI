@@ -77,6 +77,10 @@ int WidgetManager::click_handler(Point click)
                 PRINT_("found me button in widget %p\n", widget);
                 if (widget->controller_)
                 {
+                    if (widget->last_activity_)
+                    {
+                        widget->last_activity_(widget);
+                    }
                     set_active_widget(widget);
                     widget->controller_(button, widget);
                 }
@@ -99,6 +103,10 @@ int WidgetManager::click_handler(Point click)
             widget->set_click_coordinate(click);
             if (widget->controller_)
             {
+                if (widget->last_activity_)
+                {
+                    widget->last_activity_(widget);
+                }
                 set_active_widget(widget);
                 widget->controller_(NULL, widget);
             }

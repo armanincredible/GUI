@@ -55,10 +55,10 @@ int StandardTextEditorPaint(WidgetManager* widget, QPainter* painter)
         QKeyEvent* key_event = text_editor->get_key_event();
         if ((widget->get_work_state() == CurrentWork::TimerReaction) && (widget->get_active_widget() == text_editor))
         {
-            if (key_event && (key_event->key() == 0x01000004))
+            /*if (key_event && (key_event->key() == 0x01000004))
             {
                 END_(0);
-            }
+            }*/
             static bool line_need = true;
 
             int y0 = text_editor->get_start_point().y;
@@ -248,3 +248,12 @@ int timer_controller_text_editor(WidgetManager* widget)
     }
     END_(0);
 }
+
+int last_activity_text_editor(WidgetManager* widget)
+{
+    START_;
+    (widget->get_main_widget_())->set_flag(Qt::WA_OpaquePaintEvent);
+    (widget->get_main_widget_())->repaint_widget();
+    END_(0);
+}
+

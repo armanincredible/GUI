@@ -74,5 +74,6 @@ public:
 int StandardTextEditorPaint(WidgetManager*, QPainter*); //rename
 int controller_text_editor(Button*, WidgetManager*);
 int timer_controller_text_editor(WidgetManager* widget);
+int last_activity_text_editor(WidgetManager* widget);
 
 #endif // TEXTEDITOR_H

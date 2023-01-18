@@ -33,6 +33,7 @@ int make_photoshop(int argc, char *argv[])
     TextEditor red_color_editor ({200, 50}, {250, 70}, &red_color, controller_text_editor, StandardTextEditorPaint, InfoType::RedColor);
     red_color_editor.set_timer(1000);
     red_color_editor.set_timer_controller(timer_controller_text_editor);
+    red_color_editor.last_activity_ = last_activity_text_editor;
     red_color.add_widget(&red_color_editor);
     red_color.add_button(&red_color_button);
     red_color_button.set_color({1, 0, 0});
@@ -42,6 +43,7 @@ int make_photoshop(int argc, char *argv[])
     WidgetManager green_color ({200, 70}, {300, 90}, &tool_properties, controller_paint, StandardWidgetPaint);
     TextEditor green_color_editor ({200, 70}, {250, 90}, &green_color, controller_text_editor, StandardTextEditorPaint, InfoType::GreenColor);
     green_color_editor.set_timer_controller(timer_controller_text_editor);
+    green_color_editor.last_activity_ = last_activity_text_editor;
     green_color_editor.set_timer(1000);
     green_color.add_widget(&green_color_editor);
     green_color.add_button(&green_color_button);
@@ -53,6 +55,7 @@ int make_photoshop(int argc, char *argv[])
     TextEditor blue_color_editor ({200, 90}, {250, 110}, &blue_color, controller_text_editor, StandardTextEditorPaint, InfoType::BlueColor);
     blue_color_editor.set_timer(1000);
     blue_color_editor.set_timer_controller(timer_controller_text_editor);
+    blue_color_editor.last_activity_ = last_activity_text_editor;
     blue_color.add_widget(&blue_color_editor);
     blue_color.add_button(&blue_color_button);
     blue_color_button.set_color({0, 0, 1});
@@ -63,6 +66,7 @@ int make_photoshop(int argc, char *argv[])
     line_width_button.set_image_path(":/stream/thickness.png");
     TextEditor line_width_editor ({300, 90}, {400, 110}, &line_width, controller_text_editor, StandardTextEditorPaint, InfoType::Thickness);
     line_width_editor.set_timer_controller(timer_controller_text_editor);
+    line_width_editor.last_activity_ = last_activity_text_editor;
     line_width_editor.set_timer(1000);
     line_width.add_widget(&line_width_editor);
     line_width.add_button(&line_width_button);
