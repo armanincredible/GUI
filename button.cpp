@@ -90,10 +90,10 @@ int StandardButtonPaint (Button* button, QPainter* painter)
     if (button->is_colored())
     {
         Color color = button->get_color();
-        button->paintCoordinateSystem(painter, true, {0, 0, 0}, {color});
+        button->get_layer()->paint_rectangle_with_area(button, painter, color);
         END_(0);
     }
-    button->paintCoordinateSystem(painter);
+    button->get_layer()->paint_rectangle(button, painter);
     END_(0);
 }
 
@@ -124,13 +124,13 @@ int ButtonPaintFromPicture (Button* button, QPainter* painter)
         pix.scaled(w, h, Qt::IgnoreAspectRatio);
 
         painter->drawPixmap(target, pix, source);
-        button->paintCoordinateSystem(painter);
+        button->get_layer()->paint_rectangle(button, painter);
         END_(0);
     }
     else
     {
         PRINT_("buttons image path is NULL\n");
-        button->paintCoordinateSystem(painter);// add text with info abput file name
+        button->get_layer()->paint_rectangle(button, painter);// add text with info abput file name
     }
 
     END_(-1);

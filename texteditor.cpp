@@ -48,7 +48,7 @@ int StandardTextEditorPaint(WidgetManager* widget, QPainter* painter)
         int height = text_editor->CoordinateSystem::heigh();
         int widtht = text_editor->CoordinateSystem::width();
 
-        text_editor->paintCoordinateSystem(painter, true, {0, 0, 0}, {1, 1, 1});
+        widget->get_layer()->paint_rectangle_with_area(widget, painter, {1, 1, 1});
 
         painter->drawText(x0, y0, widtht, height, Qt::AlignCenter, text_editor->get_data());
 

@@ -40,6 +40,8 @@ set(PROJECT_SOURCES
     error_kernel.h
     lib_loader.cpp
     lib_loader.h
+    layer.cpp
+    layer.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

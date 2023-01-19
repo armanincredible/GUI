@@ -19,7 +19,7 @@ enum CurrentWork
     Nothing
 };
 
-class AbstrWidget : public CoordinateSystem, public QMainWindow
+class AbstrWidget : public LayerObject, public QMainWindow
 {
     virtual void paintEvent(QPaintEvent *){};
     virtual void mousePressEvent(QMouseEvent *){};
@@ -36,9 +36,9 @@ public:
         setAttribute(attribute, on);
     }
 
-    AbstrWidget(Point a, Point b):
+    AbstrWidget(Point a, Point b, Layer* layer):
         QMainWindow(),
-        CoordinateSystem(a, b)
+        LayerObject(a, b, layer)
     {}
 };
 
@@ -101,10 +101,11 @@ public:
     WidgetManager(Point start_point, Point end_point,
                   WidgetManager* parent_widget,
                   int (*controller) (Button*, WidgetManager*),
-                  int (*paint_func) (WidgetManager*, QPainter*)):
+                  int (*paint_func) (WidgetManager*, QPainter*),
+                  Layer* layer):
         parent_widget_(parent_widget),
         controller_(controller),
-        AbstrWidget(start_point, end_point),
+        AbstrWidget(start_point, end_point, layer),
         paint_function_(paint_func)
     {
         if (parent_widget)
@@ -113,22 +114,15 @@ public:
             setEnabled(false);
             //setVisible(true);
         }
+
     }
 
     WidgetManager(Point start_point, Point end_point,
                   WidgetManager* parent_widget,
-                  int (*paint_func) (WidgetManager*, QPainter*)):
-        parent_widget_(parent_widget),
-        AbstrWidget(start_point, end_point),
-        paint_function_(paint_func)
-    {
-        if (parent_widget)
-        {
-            set_flag(Qt::WA_TransparentForMouseEvents);
-            setEnabled(false);
-            //setVisible(true);
-        }
-    }
+                  int (*paint_func) (WidgetManager*, QPainter*),
+                  Layer* layer):
+        WidgetManager(start_point, end_point, parent_widget, NULL, paint_func, layer)
+    {}
 
     ~WidgetManager()
     {

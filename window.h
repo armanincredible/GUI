@@ -6,6 +6,7 @@
 #include "QPainter"
 #include "QWidget"
 #include "math.h"
+#include "layer.h"
 
 class CoordinateSystem
 {
@@ -53,6 +54,21 @@ public:
     }
     int is_my_area(Point click) const;
     int paintCoordinateSystem(QPainter*, bool = false, Color = {}, Color = {});
+};
+
+class LayerObject : public CoordinateSystem
+{
+private:
+    Layer* layer_;
+public:
+    LayerObject(Point a, Point b, Layer* layer):
+        CoordinateSystem(a, b)
+    {
+        set_layer(layer);
+    }
+
+    int set_layer(Layer* layer){layer_ = layer; return layer->add_object(this);}
+    Layer* get_layer(void){return layer_;}
 };
 
 

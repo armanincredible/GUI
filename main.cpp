@@ -4,22 +4,28 @@
 #include "tool.h"
 #include "texteditor.h"
 #include <QTimerEvent>
+#include "layer.h"
 
 int make_photoshop(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    WidgetManager main_widget ({0, 0, 0}, {1920, 1080}, NULL, StandardWidgetPaint);
-    WidgetManager paint_widget ({200, 110, 0}, {1700, 600}, &main_widget, controller_paint, StandardWidgetPaint);
-    WidgetManager palette_widget ({200, 800}, {1000, 1000}, &main_widget, controller_paint, StandardWidgetPaint);
-    WidgetManager tool_properties ({200, 50}, {1700, 110}, &main_widget, controller_paint, StandardWidgetPaint);
+
+    Canvas canvas;
+    Layer null_lvl_layer(0);
+    Layer first_lvl_layer(1);
+
+    WidgetManager main_widget ({0, 0, 0}, {1920, 1080}, NULL, StandardWidgetPaint, &null_lvl_layer);
+    WidgetManager paint_widget ({200, 110, 0}, {1700, 600}, &main_widget, controller_paint, StandardWidgetPaint, &first_lvl_layer);
+    WidgetManager palette_widget ({200, 800}, {1000, 1000}, &main_widget, controller_paint, StandardWidgetPaint, &first_lvl_layer);
+    WidgetManager tool_properties ({200, 50}, {1700, 110}, &main_widget, controller_paint, StandardWidgetPaint, &first_lvl_layer);
     //paint_widget.resize(100, 100);
     fprintf (stderr, "%p\n", &main_widget);
 
-    Button pen_button ({200, 800}, {400, 1000}, button_with_instrument, ButtonPaintFromPicture);
+    Button pen_button ({200, 800}, {400, 1000}, button_with_instrument, ButtonPaintFromPicture, &first_lvl_layer);
     pen_button.set_image_path(":/stream/pencil.png");
-    Button line_button ({400, 800}, {600, 1000}, button_with_instrument, ButtonPaintFromPicture);
+    Button line_button ({400, 800}, {600, 1000}, button_with_instrument, ButtonPaintFromPicture, &first_lvl_layer);
     line_button.set_image_path(":/stream/line.jpg");
-    Button eraser_button ({600, 800}, {800, 1000}, button_with_instrument, ButtonPaintFromPicture);
+    Button eraser_button ({600, 800}, {800, 1000}, button_with_instrument, ButtonPaintFromPicture, &first_lvl_layer);
     eraser_button.set_image_path(":/stream/eraser.jpg");
 
 /*Add tools*/
@@ -27,10 +33,11 @@ int make_photoshop(int argc, char *argv[])
     Tool line {paint_line};
     Tool eraser {clear_dot};
 
+
 /*Add colors properties*/
-    Button red_color_button ({250, 50}, {300, 70}, button_change_color_tool, StandardButtonPaint);
-    WidgetManager red_color ({200, 50}, {300, 70}, &tool_properties, controller_paint, StandardWidgetPaint);
-    TextEditor red_color_editor ({200, 50}, {250, 70}, &red_color, controller_text_editor, StandardTextEditorPaint, InfoType::RedColor);
+    Button red_color_button ({250, 50}, {300, 70}, button_change_color_tool, StandardButtonPaint, &first_lvl_layer);
+    WidgetManager red_color ({200, 50}, {300, 70}, &tool_properties, controller_paint, StandardWidgetPaint, &first_lvl_layer);
+    TextEditor red_color_editor ({200, 50}, {250, 70}, &red_color, controller_text_editor, StandardTextEditorPaint, &first_lvl_layer, InfoType::RedColor);
     red_color_editor.set_timer(1000);
     red_color_editor.set_timer_controller(timer_controller_text_editor);
     red_color_editor.last_activity_ = last_activity_text_editor;
@@ -39,9 +46,9 @@ int make_photoshop(int argc, char *argv[])
     red_color_button.set_color({1, 0, 0});
     tool_properties.add_widget(&red_color);
 
-    Button green_color_button ({250, 70}, {300, 90}, button_change_color_tool, StandardButtonPaint);
-    WidgetManager green_color ({200, 70}, {300, 90}, &tool_properties, controller_paint, StandardWidgetPaint);
-    TextEditor green_color_editor ({200, 70}, {250, 90}, &green_color, controller_text_editor, StandardTextEditorPaint, InfoType::GreenColor);
+    Button green_color_button ({250, 70}, {300, 90}, button_change_color_tool, StandardButtonPaint, &first_lvl_layer);
+    WidgetManager green_color ({200, 70}, {300, 90}, &tool_properties, controller_paint, StandardWidgetPaint, &first_lvl_layer);
+    TextEditor green_color_editor ({200, 70}, {250, 90}, &green_color, controller_text_editor, StandardTextEditorPaint, &first_lvl_layer, InfoType::GreenColor);
     green_color_editor.set_timer_controller(timer_controller_text_editor);
     green_color_editor.last_activity_ = last_activity_text_editor;
     green_color_editor.set_timer(1000);
@@ -50,9 +57,9 @@ int make_photoshop(int argc, char *argv[])
     green_color_button.set_color({0, 1, 0});
     tool_properties.add_widget(&green_color);
 
-    Button blue_color_button ({250, 90}, {300, 110}, button_change_color_tool, StandardButtonPaint);
-    WidgetManager blue_color ({200, 90}, {300, 110}, &tool_properties, controller_paint, StandardWidgetPaint);
-    TextEditor blue_color_editor ({200, 90}, {250, 110}, &blue_color, controller_text_editor, StandardTextEditorPaint, InfoType::BlueColor);
+    Button blue_color_button ({250, 90}, {300, 110}, button_change_color_tool, StandardButtonPaint, &first_lvl_layer);
+    WidgetManager blue_color ({200, 90}, {300, 110}, &tool_properties, controller_paint, StandardWidgetPaint, &first_lvl_layer);
+    TextEditor blue_color_editor ({200, 90}, {250, 110}, &blue_color, controller_text_editor, StandardTextEditorPaint, &first_lvl_layer, InfoType::BlueColor);
     blue_color_editor.set_timer(1000);
     blue_color_editor.set_timer_controller(timer_controller_text_editor);
     blue_color_editor.last_activity_ = last_activity_text_editor;
@@ -61,10 +68,10 @@ int make_photoshop(int argc, char *argv[])
     blue_color_button.set_color({0, 0, 1});
     tool_properties.add_widget(&blue_color);
 
-    WidgetManager line_width ({300, 50}, {400, 110}, &tool_properties, controller_paint, StandardWidgetPaint);
-    Button line_width_button ({300, 50}, {400, 90}, button_change_thickness, ButtonPaintFromPicture);
+    WidgetManager line_width ({300, 50}, {400, 110}, &tool_properties, controller_paint, StandardWidgetPaint, &first_lvl_layer);
+    Button line_width_button ({300, 50}, {400, 90}, button_change_thickness, ButtonPaintFromPicture, &first_lvl_layer);
     line_width_button.set_image_path(":/stream/thickness.png");
-    TextEditor line_width_editor ({300, 90}, {400, 110}, &line_width, controller_text_editor, StandardTextEditorPaint, InfoType::Thickness);
+    TextEditor line_width_editor ({300, 90}, {400, 110}, &line_width, controller_text_editor, StandardTextEditorPaint, &first_lvl_layer, InfoType::Thickness);
     line_width_editor.set_timer_controller(timer_controller_text_editor);
     line_width_editor.last_activity_ = last_activity_text_editor;
     line_width_editor.set_timer(1000);

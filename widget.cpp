@@ -39,7 +39,9 @@ int StandardWidgetPaint(WidgetManager* widget, QPainter* painter)
     {
         widget->paintCoordinateSystem(painter);
     }*/
-    widget->paintCoordinateSystem(painter);
+
+    widget->get_layer()->paint_rectangle(widget, painter);
+
     for (int i = 0; i < widget->get_widgets_num(); i++)
     {
         WidgetManager* cur_widget = (widget->get_widgets())[i];
@@ -140,6 +142,16 @@ void WidgetManager::paintEvent(QPaintEvent *)
 {
     START_;
     WidgetManager* widget = NULL;
+
+    QPainter painter(this->cast_to());
+
+    static bool have_background = false;
+    if (!have_background)
+    {
+        get_layer()->paint_rectangle_with_area(this, &painter, {1, 1, 1});
+        have_background = true;
+    }
+
     if (active_widget_)
     {
         widget = active_widget_;
@@ -148,8 +160,6 @@ void WidgetManager::paintEvent(QPaintEvent *)
     {
         widget = this;
     }
-
-    QPainter painter(this->cast_to());
 
     /*
      * for this stage this method know only about active widget
