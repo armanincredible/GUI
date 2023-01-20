@@ -42,6 +42,10 @@ set(PROJECT_SOURCES
     lib_loader.h
     layer.cpp
     layer.h
+    plugin.h
+    plugins/brush.h
+    plugins/adapter.h
+    plugins/adapter.c
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

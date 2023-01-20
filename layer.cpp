@@ -1,4 +1,5 @@
 #include "layer.h"
+#include "window.h"
 //#include "widget.h"
 
 
