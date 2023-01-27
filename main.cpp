@@ -6,6 +6,8 @@
 #include <QTimerEvent>
 #include "layer.h"
 
+#include "plugins/adapter.h"
+
 int make_photoshop(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -20,6 +22,9 @@ int make_photoshop(int argc, char *argv[])
     WidgetManager tool_properties ({200, 50}, {1700, 110}, &main_widget, controller_paint, StandardWidgetPaint, &first_lvl_layer);
     //paint_widget.resize(100, 100);
     fprintf (stderr, "%p\n", &main_widget);
+
+    PluginAdapter plugin((char*)"/home/narman/qt_projects/GUI/plugins/libPluginBrush.so", &main_widget, &first_lvl_layer);
+    fprintf (stderr, "pass\n");
 
     Button pen_button ({200, 800}, {400, 1000}, button_with_instrument, ButtonPaintFromPicture, &first_lvl_layer);
     pen_button.set_image_path(":/stream/pencil.png");
@@ -80,6 +85,7 @@ int make_photoshop(int argc, char *argv[])
     tool_properties.add_widget(&line_width);
 
     ToolManager tools {};
+    tools.add_tool(plugin.tool_);
     tools.add_tool(&cist);
     tools.add_tool(&line);
     tools.add_tool(&eraser);
@@ -95,6 +101,7 @@ int make_photoshop(int argc, char *argv[])
     palette_widget.add_button(&line_button);
     palette_widget.add_button(&pen_button);
     palette_widget.add_button(&eraser_button);
+    palette_widget.add_button(plugin.tool_button_);
 
     main_widget.resize_widget(1920, 1080);
     main_widget.show_widget();

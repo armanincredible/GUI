@@ -1,7 +1,6 @@
 #ifndef LIB_LOADER_H
 #define LIB_LOADER_H
 
-
 class lib_loader
 {
 public:

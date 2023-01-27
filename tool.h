@@ -51,6 +51,10 @@ public:
         {
             printf ("ERROR %d\n", __LINE__);
         }
+        if (!tool)
+        {
+            return -1;
+        }
         tools_num_++;
         tools_ = (Tool**) realloc (tools_, tools_num_ * sizeof(Tool*));
         if (tools_ == NULL)

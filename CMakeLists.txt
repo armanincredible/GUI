@@ -45,7 +45,8 @@ set(PROJECT_SOURCES
     plugin.h
     plugins/brush.h
     plugins/adapter.h
-    plugins/adapter.c
+    plugins/brush.cpp
+    plugins/adapter.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

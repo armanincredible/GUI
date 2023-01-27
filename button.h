@@ -39,7 +39,7 @@ class WidgetManager;
 class Button : public AbstractButton
 {
 private:
-    void* my_widget_ = nullptr;
+    WidgetManager* my_widget_ = nullptr;
     Tool* my_tool_ = nullptr;
     const char* image_path_ = NULL;
     Color color_{};
@@ -76,8 +76,8 @@ public:
     void set_tool(Tool* tool){my_tool_ = tool;}
     Tool* get_tool() const {return my_tool_;}
 
-    void set_widget(void* widget){my_widget_ = widget;}
-    void* get_widget() const {return my_widget_;}
+    void set_widget(WidgetManager* widget){my_widget_ = widget;}
+    WidgetManager* get_widget() const {return my_widget_;}
 
     void set_image_path(const char* path){image_path_ = path;}
     const char* get_image_path(){return image_path_;}
