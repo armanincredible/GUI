@@ -19,11 +19,13 @@ int ToolActivityAdapter(Tool* tool, QPainter* painter, Point p);
 class ToolAdapter: public Tool
 {
 public:
-    QImage src_ = {};
     ITool* itool_ = NULL;
-    ToolAdapter(ITool* tool):
+    WidgetManager* paint_widget_ = NULL;
+
+    ToolAdapter(ITool* tool, WidgetManager* paint_widget):
         Tool(ToolActivityAdapter),
-        itool_(tool)
+        itool_(tool),
+        paint_widget_(paint_widget)
     {}
 };
 
@@ -51,15 +53,13 @@ class ButtonAdapter: public Button
 {
 public:
     IPushButton* ibutton_ = NULL;
-    QImage src_ = {};
 
     ButtonAdapter(IPushButton* ibutton, Layer* layer):
         Button({(double)ibutton->get_pos().x, (double)ibutton->get_pos().y},
               {(double)ibutton->get_pos().x + ibutton->get_size().x,
                (double)ibutton->get_pos().y + ibutton->get_size().y},
                 ButtonAdapterController, ButtonAdapterPaint, layer),
-        ibutton_(ibutton),
-        src_(QImage(QSize(ibutton->get_size().x, ibutton->get_size().y), QImage::Format_RGB888))
+        ibutton_(ibutton)
     {}
 };
 
@@ -72,13 +72,13 @@ public:
     void* lib_ = NULL;
     void (*destroy_plugin)() = NULL;
 
+    WidgetManager* paint_widget_ = NULL;
+
     Tool* tool_ = NULL;
-
     WidgetManager* props_ = NULL;
-
     Button* tool_button_ = NULL;
 
-    Tool* make_tool_from_itool(ITool* itool)
+    Tool* make_tool_from_itool(ITool* itool, WidgetManager* paint_widget)
     {
         START_;
         if (!itool)
@@ -86,7 +86,7 @@ public:
             PRINT_("Plugin hasnt tool\n");
             END_(NULL);
         }
-        ToolAdapter* tool_adapter = new ToolAdapter(itool);
+        ToolAdapter* tool_adapter = new ToolAdapter(itool, paint_widget);
         END_(tool_adapter);
     }
 
@@ -159,15 +159,18 @@ public:
     }
 
 
-    PluginAdapter(char* path, WidgetManager* parent_widget, Layer* layer)
+    PluginAdapter(char* path, WidgetManager* paint_wiget, WidgetManager* parent_widget, Layer* layer)
     {
         if (!load_plugin(path))
         {
+            paint_widget_ = paint_wiget;
+
             if (iplugin_)
             {
-                tool_ = make_tool_from_itool(iplugin_->get_tool());
+                tool_ = make_tool_from_itool(iplugin_->get_tool(), paint_wiget);
                 props_ = make_widget_from_iwidget(iplugin_->get_props(), parent_widget, layer);
                 tool_button_ = make_button_from_ibutton(iplugin_->get_tool_button(), layer);
+                tool_button_->set_tool(tool_);
 
                 if (tool_button_ && tool_)
                 {

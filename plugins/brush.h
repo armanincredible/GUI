@@ -55,7 +55,7 @@ public:
         std::cout << "Widget::on_key_release(int)\n";
     }
 
-    void draw(unsigned int* /*screen*/, int /*width*/, int /*height*/) override {
+    void draw(unsigned char* /*screen*/, int /*width*/, int /*height*/) override {
         std::cout << "Widget::draw(unsigned int*, int, int)\n";
     }
 
@@ -63,7 +63,17 @@ public:
 
 class BrushTool : public ITool
 {
-
+    void apply(unsigned char* pixmap, int width, int height, Pair<int> point) override
+    {
+        pixmap[point.y * 3 * width + point.x * 3] = 0;
+        pixmap[point.y * 3 * width + point.x * 3 + 1] = 0;
+        pixmap[point.y * 3 * width + point.x * 3 + 2] = 0;
+        return;
+    }
+    void deactivate() override
+    {
+        return;
+    }
 };
 
 class BrushButton : public IPushButton
@@ -133,7 +143,7 @@ public:
         std::cout << "Widget::on_key_release(int)\n";
     }
 
-    void draw(unsigned int* screen, int width, int height) override {
+    void draw(unsigned char* screen, int width, int height) override {
         std::cout << "Widget::draw(unsigned int*, int, int)\n";
         //QPixmap pix (image_path_);
         //pix.
@@ -147,12 +157,25 @@ public:
                 fprintf (stderr, "image is null\n");
                 return;
             }
-            image.scaledToHeight(height);
-            fprintf (stderr, "in draw1\n");
-            image.scaledToWidth(width);
+            image.scaled(width, height);
             //image.copy()
-            //fprintf (stderr, "%d in bytes", width * 3 * height);
-            memcpy(screen, image.bits(), width * 3 * height);
+
+            image.convertTo(QImage::Format_RGB888);
+            fprintf (stderr, "%d in bytes", (int)image.sizeInBytes());
+            uchar* array = image.bits();
+
+            //memcpy(screen, image.bits(), width * 3 * height);
+            for (int j = 0; j < height; j++)
+            {
+                for (int i = 0; i < width; i++)
+                {
+                    //fprintf (stderr, "%d\n", j * 3 * width + i);
+                    screen[j * 3 * width + i * 3] = array[j * 3 * width + i * 3];
+                    screen[j * 3 * width + i * 3 + 1] = array[j * 3 * width + i * 3 + 1];
+                    screen[j * 3 * width + i * 3 + 2] = array[j * 3 * width + i * 3 + 1];
+                }
+                //fprintf (stderr, "end\n");
+            }
             //memcpy(screen, image.bits(), width * 3 * height);
             fprintf (stderr, "in draw2\n");
         }
@@ -167,12 +190,14 @@ public:
             {
                 for (int i = 0; i < width; i++)
                 {
-                    //fprintf (stderr, "iaaaaa\n");
-                    screen[j * 3 * width + i * 3] = 250;
-                    screen[j * 3 * width + i * 3 + 1] = 250;
-                    screen[j * 3 * width + i * 3 + 2] = 250;
+                    //fprintf (stderr, "%d\n", j * 3 * width + i);
+                    screen[j * 3 * width + i * 3] = 255;
+                    screen[j * 3 * width + i * 3 + 1] = 0;
+                    screen[j * 3 * width + i * 3 + 2] = 255;
                 }
+                //fprintf (stderr, "end\n");
             }
+
 
             /*for (unsigned j = (y_ - outlineThickness_); j < y_; j++) {
                 for (unsigned i = 3 * x_; i < 3 * (x_ + weight_) - (3 - 1); i += 3) {

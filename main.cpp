@@ -23,8 +23,8 @@ int make_photoshop(int argc, char *argv[])
     //paint_widget.resize(100, 100);
     fprintf (stderr, "%p\n", &main_widget);
 
-    PluginAdapter plugin((char*)"/home/narman/qt_projects/GUI/plugins/libPluginBrush.so", &main_widget, &first_lvl_layer);
-    fprintf (stderr, "pass\n");
+    PluginAdapter plugin((char*)"/home/narman/qt_projects/GUI/plugins/libPluginBrush.so", &paint_widget, &main_widget, &first_lvl_layer);
+    //fprintf (stderr, "pass\n");
 
     Button pen_button ({200, 800}, {400, 1000}, button_with_instrument, ButtonPaintFromPicture, &first_lvl_layer);
     pen_button.set_image_path(":/stream/pencil.png");

@@ -66,7 +66,7 @@ public:
      * \param width screen width in pixels.
      * \param height screen height in pixels.
      */
-    virtual void draw(unsigned int* screen, int width, int height) = 0;
+    virtual void draw(unsigned char* screen, int width, int height) = 0;
 };
 
 class IPushButton : public IWidget
@@ -131,7 +131,7 @@ public:
      * \param height height of pixmap.
      * \param point relative position of tool application in pixels.
      */
-    virtual void apply(unsigned int* pixmap, int width, int height, Pair<int> point) = 0;
+    virtual void apply(unsigned char* pixmap, int width, int height, Pair<int> point) = 0;
 
     /**
      * Deactivate tool.

@@ -37,7 +37,7 @@ int ButtonAdapterController (Button* button, WidgetManager* widget)
 int ButtonAdapterPaint(Button* button, QPainter* painter)
 {
     START_;
-    //IWidget* iwidget = (WidgetAdapter*) widget;
+
     ButtonAdapter* button_adapter = (ButtonAdapter*) button;
     int size_x = button_adapter->ibutton_->get_size().x;
     int size_y = button_adapter->ibutton_->get_size().y;
@@ -48,15 +48,15 @@ int ButtonAdapterPaint(Button* button, QPainter* painter)
     QRect target(x0, y0, size_x, size_y);
     QRect src_rect(0, 0, size_x, size_y);
 
-    uchar* collor_buffer = button_adapter->src_.bits();
+    QImage image (QSize(size_x, size_y), QImage::Format_RGB888);
+    fprintf (stderr, "%d %d\n", size_x, size_y);
 
-    button_adapter->ibutton_->draw((unsigned int*)collor_buffer, size_x,
+    uchar* collor_buffer = image.bits();
+
+    button_adapter->ibutton_->draw((unsigned char*)collor_buffer, size_x,
                                                                  size_y);
 
-    QPixmap pmap(size_x, size_y);
-    pmap.convertFromImage(button_adapter->src_);
-
-    painter->drawPixmap(target, pmap, src_rect);
+    painter->drawImage(target, image, src_rect);
 
     END_(0);
 }
@@ -76,7 +76,7 @@ int WidgetAdapterPaint(WidgetManager* widget, QPainter* painter)
     //QRect target(0, 0, 1920, 1080);
     uchar* collor_buffer = widget_adapter->src_.bits();
 
-    widget_adapter->iwidget_->draw((unsigned int*)collor_buffer, size_x,
+    widget_adapter->iwidget_->draw((unsigned char*)collor_buffer, size_x,
                                                                  size_y);
 
     QPixmap pmap(size_x, size_y);
@@ -109,19 +109,28 @@ int ToolActivityAdapter(Tool* tool, QPainter* painter, Point p)
     START_;
 
     ToolAdapter* tool_adapter = (ToolAdapter*) tool;
-    int size_x = 100;//tool_adapter->iwidget_->get_size().x;
-    int size_y = 100;//tool_adapter->iwidget_->get_size().y;
 
-    QRect target(0, 0, size_x, size_y);
-    uchar* collor_buffer = tool_adapter->src_.bits();
+    Point end = tool_adapter->paint_widget_->get_end_point();
+    Point start = tool_adapter->paint_widget_->get_start_point();
 
-    tool_adapter->itool_->apply((unsigned int*)collor_buffer, 0, 0,
+    int size_x = end.x - start.x;//tool_adapter->iwidget_->get_size().x;
+    int size_y = end.y - start.y;//tool_adapter->iwidget_->get_size().y;
+
+    int x0 = start.x;
+    int y0 = start.y;
+
+    QRect target(x0, y0, size_x, size_y);
+    QRect src_rect(0, 0, size_x, size_y);
+
+    QImage image (QSize(size_x, size_y), QImage::Format_RGB888);
+
+    uchar* collor_buffer = image.bits();
+
+    tool_adapter->itool_->apply(collor_buffer, 0, 0,
                                 {(int)p.x, (int)p.y});
 
-    QPixmap pmap(size_x, size_y);
-    pmap.convertFromImage(tool_adapter->src_);
 
-    painter->drawPixmap(target, pmap, target);
+    painter->drawImage(target, image, src_rect);
 
     END_(0);
 }
