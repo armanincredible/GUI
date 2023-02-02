@@ -65,9 +65,31 @@ class BrushTool : public ITool
 {
     void apply(unsigned char* pixmap, int width, int height, Pair<int> point) override
     {
-        pixmap[point.y * 3 * width + point.x * 3] = 0;
-        pixmap[point.y * 3 * width + point.x * 3 + 1] = 0;
-        pixmap[point.y * 3 * width + point.x * 3 + 2] = 0;
+        /*for (int i = 0; i < 10000; i++)
+        {
+            printf ("\n");
+        }*/
+        for (int j = 0; j < height; j++)
+        {
+            for (int i = 0; i < width; i++)
+            {
+                //fprintf (stderr, "%d\n", j * 3 * width + i);
+                pixmap[j * 3 * width + i * 3] = 255;
+                pixmap[j * 3 * width + i * 3 + 1] = 255;
+                pixmap[j * 3 * width + i * 3 + 2] = 255;
+            }
+            //fprintf (stderr, "end\n");
+        }
+
+        for (int j = point.y - 3; j < point.y + 3; j++)
+        {
+            for (int i = point.x - 3; i < point.x + 3; i++)
+            {
+                pixmap[j * 3 * width + i * 3] = 0;
+                pixmap[j * 3 * width + i * 3 + 1] = 0;
+                pixmap[j * 3 * width + i * 3 + 2] = 0;
+            }
+        }
         return;
     }
     void deactivate() override
@@ -181,73 +203,24 @@ public:
         }
         else
         {
-            unsigned x_ = start_point_.x;
+            unsigned x_ = 3;
             unsigned weight_ = size_.x;
             unsigned hight_ = size_.y;
-            unsigned y_ = start_point_.y;
+            unsigned y_ = 3;
             unsigned outlineThickness_ = 3;
-            for (int j = 0; j < height; j++)
+
+
+            for (int j = outlineThickness_; j < height - outlineThickness_; j++)
             {
-                for (int i = 0; i < width; i++)
+                for (int i = outlineThickness_; i < width - outlineThickness_; i++)
                 {
                     //fprintf (stderr, "%d\n", j * 3 * width + i);
                     screen[j * 3 * width + i * 3] = 255;
-                    screen[j * 3 * width + i * 3 + 1] = 0;
+                    screen[j * 3 * width + i * 3 + 1] = 255;
                     screen[j * 3 * width + i * 3 + 2] = 255;
                 }
                 //fprintf (stderr, "end\n");
             }
-
-
-            /*for (unsigned j = (y_ - outlineThickness_); j < y_; j++) {
-                for (unsigned i = 3 * x_; i < 3 * (x_ + weight_) - (3 - 1); i += 3) {
-                    screen[j * 3 * (unsigned) width + i] =
-                    screen[j * 3 * (unsigned) width + i + 1] = 0;
-                    screen[j * 3 * (unsigned) width + i + 2] = 255;
-                }
-            }
-
-            //     --------------------
-            //     |                  |
-            //     |                  |
-            //     |                  |
-            // (*) --------------------
-            for (unsigned j = (y_ + hight_); j < (y_ + hight_ + outlineThickness_); j++) {
-                for (unsigned i = 3 * x_; i < 3 * (x_ + weight_) - (3 - 1); i += 3) {
-                    screen[j * 3 * (unsigned) width + i] =
-                    screen[j * 3 * (unsigned) width + i + 1] = 0;
-                    screen[j * 3 * (unsigned) width + i + 2] = 255;
-                }
-            }
-
-            // (*)
-            //  --------------------
-            //  |                  |
-            //  |                  |
-            //  |                  |
-            //  --------------------
-            for (unsigned j = (y_ - outlineThickness_); j < (y_ + hight_ + outlineThickness_); j++) {
-                for (unsigned i = 3 * (x_ - outlineThickness_); i < 3 * (x_) - (3 - 1); i += 3) {
-                    screen[j * 3 * (unsigned) width + i] =
-                    screen[j * 3 * (unsigned) width + i + 1] = 0;
-                    screen[j * 3 * (unsigned) width + i + 2] = 255;
-                }
-            }
-
-            //                    (*)
-            //  --------------------
-            //  |                  |
-            //  |                  |
-            //  |                  |
-            //  --------------------
-            for (unsigned j = (y_ - outlineThickness_); j < (y_ + hight_ + outlineThickness_); j++) {
-                for (unsigned i = 3 * (x_ + weight_); i < 3 * (x_ + weight_ + outlineThickness_) - (3 - 1); i += 3) {
-                    screen[j * 3 * (unsigned) width + i] =
-                    screen[j * 3 * (unsigned) width + i + 1] = 0;
-                    screen[j * 3 * (unsigned) width + i + 2] = 255;
-                }
-            }*/
-
         }
     }
     void set_signal(void (* /*signal*/)(IPushButton*)) override {

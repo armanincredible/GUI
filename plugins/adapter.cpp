@@ -122,15 +122,36 @@ int ToolActivityAdapter(Tool* tool, QPainter* painter, Point p)
     QRect target(x0, y0, size_x, size_y);
     QRect src_rect(0, 0, size_x, size_y);
 
-    QImage image (QSize(size_x, size_y), QImage::Format_RGB888);
+    WidgetManager* main_widget = tool_adapter->paint_widget_->get_main_widget_();
 
-    uchar* collor_buffer = image.bits();
-
-    tool_adapter->itool_->apply(collor_buffer, 0, 0,
-                                {(int)p.x, (int)p.y});
+    QPixmap pixmap(1920, 1080);
+    pixmap.fill(Qt::transparent);
 
 
-    painter->drawImage(target, image, src_rect);
+    //main_widget->render(&pixmap, {0, 0}, QRegion(0, 0, 1920, 1080));
+    main_widget->render(&pixmap);
+    QImage image_one = pixmap.toImage();
+    QImage image_one_new = image_one.convertToFormat(QImage::Format_RGB888);
+    QImage image_mini (QSize(size_x, size_y), QImage::Format_RGB888);
+
+    //fprintf(stderr, "%d bytes in main_widget, exp %d\n", (int)image_one_new.sizeInBytes(), 3 * 1920 * 1080);
+    //fprintf(stderr, "%d bytes in mini widget, exp %d\n", (int)image_mini.sizeInBytes(), size_x * 3 * size_y);
+
+    uchar* mini_widget_buffer = image_mini.bits();
+    uchar* widget_buffer = image_one_new.bits();
+
+    for (int J = y0, j_m = 0; J < end.y; J++, j_m++)
+    {
+       //fprintf(stderr, "hello\n");
+       memcpy(mini_widget_buffer + j_m * 3 * size_x, widget_buffer + J * 3 * 1920 + x0 * 3, 3 * size_x);
+    }
+
+    tool_adapter->itool_->apply(mini_widget_buffer, size_x, size_y,
+                                {(int)p.x - x0, (int)p.y - y0});
+
+
+    painter->drawImage(target, image_mini, src_rect);
+    //painter->drawImage(src_rect, image_one_new, src_rect);
 
     END_(0);
 }
